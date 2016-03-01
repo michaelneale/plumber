@@ -7,7 +7,24 @@ import org.jgrapht.graph.SimpleDirectedGraph
 
 import javax.annotation.Nonnull
 
-
+/**
+ * How this would be used:
+ *  * The step would read the list of phases, and add them to the dependency graph.
+ *  * Next, it would add the dependencies (either "before" or "after") for each phase, checking to see if addDependency
+ *      returns false. If so, a cycle has been created and the step will fail out.
+ *  * After adding the dependencies, the step would then construct the list of "phase groups" in execution order - i.e.,
+ *      getNextPhases() will be called to find all phases which don't depend on anything else and are therefore eligible
+ *      for execution.
+ *  * After adding a "phase group" to the step's execution order, the step would pass the "phase group" to
+ *      postPhaseProcessing(...) to remove the phases now in the execution order from the graph.
+ *  * The above two would then be repeated until hasMorePhases() returns false, at which point we've gone through the
+ *      full set of phases and none remain to be added to the execution order.
+ *
+ * TODO:
+ *  * Maybe mash together getNextPhases() and postPhaseProcessing() - left them separate for now in case we decide to
+ *      do something that would require keeping the graph state intact between finding the next phases and removing them.
+ *  * Possibly add some logic for limiting the maximum number of concurrent phases in a single batch?
+ */
 public class PlumberDependencyGraph {
     private DirectedGraph phaseGraph
 
