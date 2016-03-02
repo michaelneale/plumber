@@ -30,9 +30,16 @@ public abstract class PlumberContributor implements ExtensionPoint {
      */
     public abstract @Nonnull String getName();
 
-    // TODO: How do we inject the contributor? GlobalVariables have CpsScript passed to them, but since we'll be running
-    // as a Step, we won't have that...so how do we parse it as Pipeline DSL?
-    // LATER: Oh, duh, like LoadStepExecution.
+    /*
+     * TODO: How do we inject the contributor? GlobalVariables have CpsScript passed to them, but since we'll be running
+     * as a Step, we won't have that...so how do we parse it as Pipeline DSL?
+     * LATER: Oh, duh, like LoadStepExecution.
+     * How do we load/parse the scripts at load time and not at runtime? In a StepExecution, we can use CpsThread to
+     * get to a GroovyShell eventually, which does the trick for parsing/loading. In GlobalVariable land, we've got
+     * CpsScript, but we're still loading it at runtime...hrm. May have to settle for now. Have a method here that gets
+     * passed a CpsStepContext and/or CpsThread?
+     * Use GroovyCodeSource to store the actual script? Then all we need to do is figure out how to read it originally.
+     */
 
     /**
      * Returns all the registered {@link PlumberContributor}s.

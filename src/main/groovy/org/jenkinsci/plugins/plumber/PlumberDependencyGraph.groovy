@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.plumber
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import org.jgrapht.DirectedGraph
 import org.jgrapht.alg.CycleDetector
 import org.jgrapht.graph.DefaultEdge
@@ -25,6 +26,7 @@ import javax.annotation.Nonnull
  *      do something that would require keeping the graph state intact between finding the next phases and removing them.
  *  * Possibly add some logic for limiting the maximum number of concurrent phases in a single batch?
  */
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class PlumberDependencyGraph {
     private DirectedGraph phaseGraph
 
@@ -92,7 +94,9 @@ public class PlumberDependencyGraph {
      * @param phases
      */
     public void postPhaseProcessing(List<String> phases) {
-        phases.each { phaseGraph.removeVertex(it) }
+        phases.each {
+            phaseGraph.removeVertex(it)
+        }
     }
 
     /**
@@ -104,4 +108,5 @@ public class PlumberDependencyGraph {
         return !phaseGraph.vertexSet().isEmpty()
     }
 
+    private static final int serialVersionUID = 1L
 }
