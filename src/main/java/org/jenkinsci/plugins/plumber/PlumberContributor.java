@@ -23,31 +23,32 @@ import hudson.ExtensionPoint;
 import javax.annotation.Nonnull;
 import java.net.URL;
 
+/**
+ * {@link ExtensionPoint} for contributing Plumber scripts. Looks for relevant script in classpath and provides the
+ * {@link GroovyCodeSource} for the script.
+ *
+ * Down the road, we'll be adding validation (probably elsewhere in the plugin, after parsing the script and having
+ * something we can inspect to be sure it doesn't do things that are illegal in a Plumber context like node blocks,
+ * stages, input...) and the logic to actually parse and use the scripts, but the intent is that Plumber scripts will be
+ * a strict subset of valid {@link org.jenkinsci.plugins.workflow.cps.global.UserDefinedGlobalVariable}-style scripts,
+ * which can be used in both forms.
+ */
 public abstract class PlumberContributor implements ExtensionPoint {
 
     /**
      * The name of the contributor. Should be unique.
      * TODO: Figure out how to enforce uniqueness?
+     * 
      * @return The name of the contributor.
      */
     public abstract @Nonnull String getName();
-
-    /*
-     * TODO: How do we inject the contributor? GlobalVariables have CpsScript passed to them, but since we'll be running
-     * as a Step, we won't have that...so how do we parse it as Pipeline DSL?
-     * LATER: Oh, duh, like LoadStepExecution.
-     * How do we load/parse the scripts at load time and not at runtime? In a StepExecution, we can use CpsThread to
-     * get to a GroovyShell eventually, which does the trick for parsing/loading. In GlobalVariable land, we've got
-     * CpsScript, but we're still loading it at runtime...hrm. May have to settle for now. Have a method here that gets
-     * passed a CpsStepContext and/or CpsThread?
-     * Use GroovyCodeSource to store the actual script? Then all we need to do is figure out how to read it originally.
-     */
 
     /**
      * Get the {@link GroovyCodeSource} for this contributor. Throws an {@link IllegalStateException} if the script
      * can't be loaded.
      * TODO: Probably figure out how to cache this so we don't have to load it every time.
      * TODO: Validation that the script is a valid candidate for Plumber contribution - that may be in the parsing tho.
+     * TODO: Actual parsing - elsewhere, in a CPS context so that we can actually load it right.
      *
      * @return {@link GroovyCodeSource} for the contributor.
      * @throws Exception
@@ -63,6 +64,7 @@ public abstract class PlumberContributor implements ExtensionPoint {
 
             return gsc;
         } catch (RuntimeException e) {
+            // Probably could be a better error message...
             throw new IllegalStateException("Could not open script source.");
         }
     }
