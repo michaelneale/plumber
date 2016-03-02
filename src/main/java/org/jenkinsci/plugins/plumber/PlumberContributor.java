@@ -32,6 +32,7 @@ public abstract class PlumberContributor implements ExtensionPoint {
 
     // TODO: How do we inject the contributor? GlobalVariables have CpsScript passed to them, but since we'll be running
     // as a Step, we won't have that...so how do we parse it as Pipeline DSL?
+    // LATER: Oh, duh, like LoadStepExecution.
 
     /**
      * Returns all the registered {@link PlumberContributor}s.
