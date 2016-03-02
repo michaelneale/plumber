@@ -16,10 +16,12 @@
  */
 package org.jenkinsci.plugins.plumber;
 
+import groovy.lang.GroovyCodeSource;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
 
 import javax.annotation.Nonnull;
+import java.net.URL;
 
 public abstract class PlumberContributor implements ExtensionPoint {
 
@@ -40,6 +42,30 @@ public abstract class PlumberContributor implements ExtensionPoint {
      * passed a CpsStepContext and/or CpsThread?
      * Use GroovyCodeSource to store the actual script? Then all we need to do is figure out how to read it originally.
      */
+
+    /**
+     * Get the {@link GroovyCodeSource} for this contributor. Throws an {@link IllegalStateException} if the script
+     * can't be loaded.
+     * TODO: Probably figure out how to cache this so we don't have to load it every time.
+     * TODO: Validation that the script is a valid candidate for Plumber contribution - that may be in the parsing tho.
+     *
+     * @return {@link GroovyCodeSource} for the contributor.
+     * @throws Exception
+     */
+    public GroovyCodeSource getScript() throws Exception {
+        // Expect that the script will be at package/name/className/contributorName.groovy
+        URL scriptUrl = getClass().getClassLoader().getResource(getClass().getName().replace('$', '/').replace('.', '/')
+                + '/' + getName() + ".groovy");
+
+        try {
+            GroovyCodeSource gsc = new GroovyCodeSource(scriptUrl);
+            gsc.setCachable(true);
+
+            return gsc;
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Could not open script source.");
+        }
+    }
 
     /**
      * Returns all the registered {@link PlumberContributor}s.
