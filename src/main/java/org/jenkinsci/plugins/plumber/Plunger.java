@@ -33,10 +33,10 @@ import java.net.URL;
  * a strict subset of valid {@link org.jenkinsci.plugins.workflow.cps.global.UserDefinedGlobalVariable}-style scripts,
  * which can be used in both forms.
  */
-public abstract class PlumberContributor implements ExtensionPoint {
+public abstract class Plunger implements ExtensionPoint {
 
     /**
-     * The name of the contributor. Should be unique.
+     * The name of the plunger. Should be unique.
      * TODO: Figure out how to enforce uniqueness?
      * 
      * @return The name of the contributor.
@@ -70,10 +70,10 @@ public abstract class PlumberContributor implements ExtensionPoint {
     }
 
     /**
-     * Returns all the registered {@link PlumberContributor}s.
+     * Returns all the registered {@link Plunger}s.
      */
-    public static ExtensionList<PlumberContributor> all() {
-        return ExtensionList.lookup(PlumberContributor.class);
+    public static ExtensionList<Plunger> all() {
+        return ExtensionList.lookup(Plunger.class);
     }
 
 }
