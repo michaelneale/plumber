@@ -103,4 +103,8 @@ public class Phase extends AbstractPlumberModel {
     Phase unstash(Closure<?> closure) {
         addClosureValToList("unstash", Unstash.getClass(), closure)
     }
+
+    Phase unstash(String from, String dir) {
+        addValToList("unstash", new Unstash().fromPhase(from).dir(dir))
+    }
 }
