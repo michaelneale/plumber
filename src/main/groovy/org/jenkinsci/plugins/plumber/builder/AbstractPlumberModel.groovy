@@ -28,6 +28,8 @@ package org.jenkinsci.plugins.plumber.builder
  */
 public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
 
+    // TODO: Add some generalized validation hook here with implementations in the subclasses.
+
     public T fieldVal(String key, Object val) {
         this."${key}" = val
         (T)this
