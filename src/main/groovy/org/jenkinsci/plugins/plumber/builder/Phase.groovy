@@ -29,16 +29,16 @@ import groovy.transform.ToString
 @ToString
 @EqualsAndHashCode
 public class Phase extends AbstractPlumberModel {
-    private String name
-    private List<String> before = []
-    private List<String> after = []
-    private Action action
-    private String label
-    private String dockerImage
-    private List<String> archiveDirs = []
-    private List<String> stashDirs = []
-    private List<Unstash> unstash = []
-    private Notifications notifications
+    String name
+    List<String> before = []
+    List<String> after = []
+    Action action
+    String label
+    String dockerImage
+    List<String> archiveDirs = []
+    List<String> stashDirs = []
+    List<Unstash> unstash = []
+    Notifications notifications
 
     Phase name(String val) {
         fieldVal("name", val)

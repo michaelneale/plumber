@@ -29,9 +29,9 @@ import groovy.transform.ToString
 @ToString
 @EqualsAndHashCode
 public class Action extends AbstractPlumberModel {
-    private MappedClosure plunger
-    private String script
-    private String inputText
+    MappedClosure plunger
+    String script
+    String inputText
 
     Action plunger(Closure<?> closure) {
         closureVal("plunger", MappedClosure.getClass(), closure)

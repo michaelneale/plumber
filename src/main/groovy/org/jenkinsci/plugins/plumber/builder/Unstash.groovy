@@ -29,8 +29,8 @@ import groovy.transform.ToString
 @ToString
 @EqualsAndHashCode
 public class Unstash extends AbstractPlumberModel {
-    private String fromPhase
-    private String dir
+    String fromPhase
+    String dir
 
     Unstash fromPhase(String val) {
         fieldVal("fromPhase", val)

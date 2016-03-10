@@ -30,11 +30,11 @@ import groovy.transform.ToString
 @EqualsAndHashCode
 public class Notifications extends AbstractPlumberModel {
 
-    private Map<String,MappedClosure> configs = [:]
-    private Boolean allPhases = true
-    private Boolean skipThisPhase = false
-    private Boolean onSuccess = false
-    private Boolean onFailure = true
+    Map<String,MappedClosure> configs = [:]
+    Boolean allPhases = true
+    Boolean skipThisPhase = false
+    Boolean onSuccess = false
+    Boolean onFailure = true
 
     Notifications config(String type, Closure<?> closure) {
         addClosureValToMap("configs", MappedClosure.getClass(), type, closure)
