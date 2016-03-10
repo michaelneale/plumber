@@ -76,11 +76,19 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("archiveDirs", val)
     }
 
+    Phase archiveDirs(String... val) {
+        fieldVal("archiveDirs", val)
+    }
+
     Phase stashDir(String val) {
         addValToList("stashDirs", val)
     }
 
     Phase stashDirs(List<String> val) {
+        fieldVal("stashDirs", val)
+    }
+
+    Phase stashDirs(String... val) {
         fieldVal("stashDirs", val)
     }
 

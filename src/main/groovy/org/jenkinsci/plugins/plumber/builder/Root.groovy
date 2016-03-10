@@ -56,11 +56,19 @@ public class Root extends AbstractPlumberModel {
         fieldVal("archiveDirs", val)
     }
 
+    Root archiveDirs(String... val) {
+        fieldVal("archiveDirs", val)
+    }
+
     Root stashDir(String val) {
         addValToList("stashDirs", val)
     }
 
     Root stashDirs(List<String> val) {
+        fieldVal("stashDirs", val)
+    }
+
+    Root stashDirs(String... val) {
         fieldVal("stashDirs", val)
     }
 }
