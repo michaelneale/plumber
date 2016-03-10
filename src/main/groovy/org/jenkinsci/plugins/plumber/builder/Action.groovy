@@ -26,22 +26,32 @@ package org.jenkinsci.plugins.plumber.builder
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-import javax.annotation.Nonnull
-
-
 @ToString
 @EqualsAndHashCode
-public class PlungerModel extends AbstractPlumberModel {
-    String name
-    Closure config
+public class Action extends AbstractPlumberModel {
+    private MappedClosure plunger
+    private String script
+    private String inputText
 
-    public PlungerModel(Map args) {
-        this((String) args.name,
-                (Closure) args.config)
+    Action plunger(Closure<?> closure) {
+        closureVal("plunger", MappedClosure.getClass(), closure)
     }
 
-    public PlungerModel(@Nonnull String name, Closure config = null) {
-        this.name = name
-        this.config = config
+    Action plunger(String name, Closure<?> closure) {
+        closureVal("plunger", MappedClosure.getClass(), closure)
+        this.plunger."${name}" = name
+        this
+    }
+
+    Action plunger(String val) {
+        closureVal("plunger", MappedClosure.getClass(), { name val })
+    }
+
+    Action script(String script) {
+        fieldVal("script", script)
+    }
+
+    Action inputText(String inputText) {
+        fieldVal("inputText", inputText)
     }
 }

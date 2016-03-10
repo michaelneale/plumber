@@ -26,22 +26,33 @@ package org.jenkinsci.plugins.plumber.builder
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-import javax.annotation.Nonnull
-
 @ToString
 @EqualsAndHashCode
-public class UnstashModel extends AbstractPlumberModel {
-    String fromPhase
-    String dir
+public class Notifications extends AbstractPlumberModel {
 
-    public UnstashModel(Map args) {
-        this((String) args.fromPhase, (String) args.dir)
+    private Map<String,MappedClosure> configs = [:]
+    private Boolean allPhases = true
+    private Boolean skipThisPhase = false
+    private Boolean onSuccess = false
+    private Boolean onFailure = true
+
+    Notifications config(String type, Closure<?> closure) {
+        addClosureValToMap("configs", MappedClosure.getClass(), type, closure)
     }
 
-    public UnstashModel(@Nonnull String fromPhase,
-                        @Nonnull String dir) {
-        this.fromPhase = fromPhase
-        this.dir = dir
-        new NodeBuilder()
+    Notifications allPhases(Boolean val) {
+        fieldVal("allPhases", val)
+    }
+
+    Notifications skipThisPhase(Boolean val) {
+        fieldVal("skipThisPhase", val)
+    }
+
+    Notifications onSuccess(Boolean val) {
+        fieldVal("onSuccess", val)
+    }
+
+    Notifications onFailure(Boolean val) {
+        fieldVal("onFailure", val)
     }
 }

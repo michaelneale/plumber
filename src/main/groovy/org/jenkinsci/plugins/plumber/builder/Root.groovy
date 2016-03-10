@@ -23,43 +23,44 @@
  */
 package org.jenkinsci.plugins.plumber.builder
 
-/**
- * Abstract class for other builder model classes to inherit from, so we can get fromNode.
- */
-public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
-    public T fieldVal(String key, Object val) {
-        this."${key}" = val
-        (T)this
+@ToString
+@EqualsAndHashCode
+public class Root extends AbstractPlumberModel {
+
+    List<Phase> phases = []
+    Map<String,String> env = [:]
+    Notifications notifications
+    List<String> archiveDirs = []
+    List<String> stashDirs = []
+
+    Root phase(Closure<?> closure) {
+        addClosureValToList("phases", Phase.getClass(), closure)
     }
 
-    public T addValToList(String key, Object val) {
-        this."${key}" << val
-        (T)this
+    Root env(Map<String,String> val) {
+        fieldVal("env", val)
     }
 
-    public T closureVal(String key, Class clazz, Closure<?> closure) {
-        this."${key}" = resolveClosure(clazz, closure)
-        (T)this
+    Root notifications(Closure<?> closure) {
+        closureVal("notifications", Notifications.getClass(), closure)
     }
 
-    public T addClosureValToMap(String key, Class clazz, String mapKey, Closure<?> closure) {
-        this."${key}".put(mapKey, resolveClosure(clazz, closure))
-        (T)this
+    Root archiveDir(String val) {
+        addValToList("archiveDirs", val)
     }
 
-    public T addClosureValToList(String key, Class clazz, Closure<?> closure) {
-        this."${key}" << resolveClosure(clazz, closure)
-        (T)this
+    Root archiveDirs(List<String> val) {
+        fieldVal("archiveDirs", val)
     }
 
-    private Object resolveClosure(Class clazz, Closure<?> closure) {
-        def tmpObject = clazz.newInstance()
+    Root stashDir(String val) {
+        addValToList("stashDirs", val)
+    }
 
-        closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.delegate = tmpObject
-        closure.call()
-
-        return tmpObject
+    Root stashDirs(List<String> val) {
+        fieldVal("stashDirs", val)
     }
 }

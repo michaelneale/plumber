@@ -25,41 +25,26 @@ package org.jenkinsci.plugins.plumber.builder
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import org.jenkinsci.plugins.plumber.Utils
 
-import javax.annotation.Nonnull
 
+/**
+ * Helper class for translating from a closure to a map.
+ */
 @ToString
 @EqualsAndHashCode
-public class RootModel extends AbstractPlumberModel {
+class MappedClosure {
+    @Delegate Map<String,Object> delegate = [:]
 
-    List<PhaseModel> phases
-    Map<String,String> env
-    NotificationsModel notifications
-    List<String> archiveDir
-    List<String> stashDir
-
-    public RootModel(Map args) {
-        this((List<PhaseModel>) args.phases,
-                (Map<String,String>) args.env,
-                (NotificationsModel) args.notifications,
-                Utils.listForArg(args.archiveDir),
-                Utils.listForArg(args.stashDir)
-        )
-    }
-
-    public RootModel(@Nonnull List<PhaseModel> phases = null,
-                     Map<String, String> env = null,
-                     NotificationsModel notifications = null,
-                     List<String> archiveDir = null,
-                     List<String> stashDir = null) {
-        if (phases.isEmpty()) {
-            throw new IllegalArgumentException("One or more 'phases' must be specified.")
-        }
-        this.phases = phases
-        this.env = env
-        this.notifications = notifications
-        this.archiveDir = archiveDir
-        this.stashDir = stashDir
+    /**
+     * Convenience method to allow for "foo 'bar'" style population of the underlying map.
+     *
+     * @param methodName Key name, basically.
+     * @param args First element will be a String hopefully.
+     *
+     * @return this
+     */
+    def methodMissing(String methodName, args) {
+        this."${methodName}" = args[0]
+        this
     }
 }

@@ -28,30 +28,15 @@ import groovy.transform.ToString
 
 @ToString
 @EqualsAndHashCode
-public class ActionModel extends AbstractPlumberModel {
-    PlungerModel plunger
-    String script
-    String inputText
+public class Unstash extends AbstractPlumberModel {
+    private String fromPhase
+    private String dir
 
-    public ActionModel(Map args) {
-        this((PlungerModel) args.plunger,
-                (String) args.script,
-                (String) args.inputText)
+    Unstash fromPhase(String val) {
+        fieldVal("fromPhase", val)
     }
 
-    public ActionModel(PlungerModel plunger = null, String script = null, String inputText = null) {
-        if (plunger == null
-                && script == null
-                && inputText == null) {
-            throw new IllegalArgumentException("One of 'plunger', 'script', or 'inputText' must be included and non-null.")
-        }
-
-        if ([plunger, script, inputText].count { it != null } > 1) {
-            throw new IllegalArgumentException("No more than one of 'plunger', 'script', or 'inputText' may be set.")
-        }
-
-        this.plunger = plunger
-        this.script = script
-        this.inputText = inputText
+    Unstash dir(String val) {
+        fieldVal("dir", val)
     }
 }
