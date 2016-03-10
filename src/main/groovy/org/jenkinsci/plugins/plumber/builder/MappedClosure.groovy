@@ -44,7 +44,14 @@ class MappedClosure {
      * @return this
      */
     def methodMissing(String methodName, args) {
-        this."${methodName}" = args[0]
+        if (args.length > 1) {
+            this."${methodName}" = args
+        } else if (args.length == 1) {
+            this."${methodName}" = args[0]
+        }
+
+        // TODO: Probably error out if we get an empty args?
+        
         this
     }
 }
