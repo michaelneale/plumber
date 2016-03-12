@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.plumber.model
 
+import com.google.common.collect.ImmutableList
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
@@ -41,6 +42,8 @@ public class Phase extends AbstractPlumberModel {
     List<String> stashDirs = []
     List<Unstash> unstash = []
     Notifications notifications
+    Map<String,String> env = [:]
+
 
     Phase name(String val) {
         fieldVal("name", val)
@@ -110,8 +113,14 @@ public class Phase extends AbstractPlumberModel {
         addValToList("unstash", new Unstash().fromPhase(from).dir(dir))
     }
 
-    public String toPipelineScript(int tabsDepth) {
+    Phase env(Map<String,String> val) {
+        fieldVal("env", val)
+    }
+
+    // Actually, I need to pass the root level in here too so that I know defaults for notifications etc.
+    public String toPipelineScript(Root root, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
+        def overrides = getOverrides(root)
 
         def lines = []
 
@@ -120,4 +129,40 @@ public class Phase extends AbstractPlumberModel {
         return lines.collect { "${tabs}${it}" }.join("\n")
     }
 
+    /**
+     * Get the archiveDirs, stashDirs, env and notifications for this phase, defaulting to the root versions if
+     * not specified here.
+     *
+     * @param root The Root this phase is in.
+     * @return A map of archiveDirs, stashDirs, env and notifications
+     */
+    private Map getOverrides(Root root) {
+        def overrideMap = [:]
+
+        if (this.archiveDirs.isEmpty()) {
+            overrideMap.archiveDirs = ImmutableList.copyOf(root.archiveDirs)
+        } else {
+            overrideMap.archiveDirs = ImmutableList.copyOf(this.archiveDirs)
+        }
+
+        if (this.stashDirs.isEmpty()) {
+            overrideMap.stashDirs = ImmutableList.copyOf(root.stashDirs)
+        } else {
+            overrideMap.stashDirs = ImmutableList.copyOf(this.stashDirs)
+        }
+
+        overrideMap.env = [:]
+        overrideMap.env.putAll(root.env)
+
+        overrideMap.env.putAll(this.env)
+
+        if (this.notifications == null) {
+            overrideMap.notifications = root.notifications
+        } else {
+            overrideMap.notifications = this.notifications
+        }
+
+        overrideMap
+
+    }
 }
