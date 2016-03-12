@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.plumber.builder
 
+import com.google.common.collect.ImmutableMap
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
@@ -53,5 +54,9 @@ class MappedClosure {
         // TODO: Probably error out if we get an empty args?
         
         this
+    }
+
+    def getRawMap() {
+        return ImmutableMap.copyOf(delegate)
     }
 }
