@@ -48,7 +48,7 @@ public class Utils {
         }
     }
 
-    public static String toPipelineScript(Map tree, int tabDepth = 0) {
+    public static String toPlumberArg(Map tree, int tabDepth = 0) {
 
         def tabs = getTabs(tabDepth)
 
@@ -67,7 +67,7 @@ public class Utils {
 
         tree.closures.each { k, Map v ->
             bldr.append("${tabs}${k} {\n")
-            bldr.append(toPipelineScript(v, tabDepth + 1))
+            bldr.append(toPlumberArg(v, tabDepth + 1))
             bldr.append("${tabs}}\n\n")
         }
 
