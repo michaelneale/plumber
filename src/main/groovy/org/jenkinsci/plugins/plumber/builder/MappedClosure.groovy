@@ -56,7 +56,15 @@ class MappedClosure {
         this
     }
 
-    def getRawMap() {
-        return ImmutableMap.copyOf(delegate)
+    public Map toTree() {
+        def tree = [:]
+
+        tree.name = delegate.name
+        tree.args = [:]
+        tree.closures = [:]
+
+        tree.args.putAll(delegate)
+
+        return tree
     }
 }

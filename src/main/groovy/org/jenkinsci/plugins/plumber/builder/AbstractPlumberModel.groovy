@@ -114,7 +114,7 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
     }
 
     /**
-     * Transforms this node of the plumber model and everything below it into a simple form for later processing.
+     * Transforms this node of the plumber model and everything below it into a simple form for later processing. 
      *
      * @return Map of the plumber model from this node downward in a simple name/args/closures form for each closure.
      */
@@ -126,7 +126,7 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
         // Arguments that aren't nested closures.
         tree.args = [:]
 
-        // Arguments that *are* nested closures.
+        // Arguments that *are* nested closures, including MappedClosures.
         tree.closures = [:]
 
         // Get all the non-synthetic fields of the class we're in.
@@ -154,7 +154,7 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
 
                         // If we've got a collection here, then we need to collect and transform its elements.
                         if (fieldValue instanceof Collection) {
-                            tree.closures."${fieldName}" = ((Collection)fieldValue).collect { AbstractPlumberModel a ->
+                            tree.closures."${fieldName}" = ((Collection) fieldValue).collect { AbstractPlumberModel a ->
                                 a.toTree()
                             }
                         }
@@ -171,9 +171,9 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
                 else if (AbstractPlumberModel.class.isAssignableFrom(f.getType())) {
                     tree.closures."${fieldName}" = ((AbstractPlumberModel) fieldValue).toTree()
                 }
-                // MappedClosures are handled a little special - pull the actual Map out of them and use that.
+                // MappedClosures are handled a little special - just grab it as is for now.
                 else if (fieldValue instanceof MappedClosure) {
-                    tree.args."${fieldName}" = ((MappedClosure) fieldValue).getRawMap()
+                    tree.closures."${fieldName}" = ((MappedClosure) fieldValue).toTree()
                 }
                 // And lastly, if it's not a parameterized type and it's not a Plumber class *and* it's not a
                 // MappedClosure, add it to args.
@@ -185,4 +185,6 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
 
         return tree
     }
+
+    static final int serialVersionUID = 1L
 }

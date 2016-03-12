@@ -23,7 +23,9 @@
  */
 package org.jenkinsci.plugins.plumber
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Utils {
 
     public static List<String> listForArg(Object arg) {
@@ -44,5 +46,35 @@ public class Utils {
         } else {
             return null
         }
+    }
+
+    public static String toPipelineScript(Map tree, int tabDepth = 0) {
+
+        def tabs = getTabs(tabDepth)
+
+        def bldr = new StringBuilder()
+
+        tree.args.each { k, v ->
+            if (v instanceof Map) {
+                bldr.append("${tabs}${k} " + v.collect { argKey, argVal -> "${argKey}: \"${argVal}\"" }.join(", "))
+            } else if (v instanceof List || v instanceof Set) {
+                bldr.append("${tabs}${k} " + v.collect { "\"${it}\"" }.join(", "))
+            } else {
+                bldr.append("${tabs}${k} \"${v}\"")
+            }
+            bldr.append("\n\n")
+        }
+
+        tree.closures.each { k, Map v ->
+            bldr.append("${tabs}${k} {\n")
+            bldr.append(toPipelineScript(v, tabDepth + 1))
+            bldr.append("${tabs}}\n\n")
+        }
+
+        return bldr.toString()
+    }
+
+    private static String getTabs(int tabDepth) {
+        "\t" * tabDepth
     }
 }
