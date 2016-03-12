@@ -26,37 +26,83 @@ package org.jenkinsci.plugins.plumber.builder
 import java.lang.reflect.ParameterizedType
 
 /**
- * Abstract class for other builder model classes to inherit from, so we can get fromNode.
+ * Abstract class for other builder model classes to inherit from, so we can get a ton of convenience methods.
  */
 public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.
 
+    /**
+     * Sets the given field to the given value.
+     *
+     * @param key Name of the field to set
+     * @param val The field's value
+     * @return this object with the field set
+     */
     public T fieldVal(String key, Object val) {
         this."${key}" = val
         (T) this
     }
 
+    /**
+     * Adds the given value to the list at the given field.
+     *
+     * @param key Name of the field to add to.
+     * @param val The new value
+     * @return this object with the field set
+     */
     public T addValToList(String key, Object val) {
         this."${key}" << val
         (T) this
     }
 
+    /**
+     * Sets the given field to the given resolved closure of the given class.
+     *
+     * @param key Name of the field to set
+     * @param clazz The class we'll be resolving the closure to.
+     * @param closure The closure in question
+     * @return this object with the field set to the resolved closure.
+     */
     public T closureVal(String key, Class clazz, Closure<?> closure) {
         this."${key}" = resolveClosure(clazz, closure)
         (T) this
     }
 
+    /**
+     * Adds the given resolved closure of the given class to the map at the given field using the given map key..
+     *
+     * @param key Name of the field to add to.
+     * @param clazz The class we'll be resolving the closure to.
+     * @param mapKey The key in the map we'll be using.
+     * @param closure The closure in question
+     * @return this object with the field updated.
+     */
     public T addClosureValToMap(String key, Class clazz, String mapKey, Closure<?> closure) {
         this."${key}".put(mapKey, resolveClosure(clazz, closure))
         (T) this
     }
 
+    /**
+     * Adds the given resolved closure of the given class to the list at the given field.
+     *
+     * @param key Name of the field to add to.
+     * @param clazz The class we'll be resolving the closure to.
+     * @param closure The closure in question
+     * @return this object with the field updated.
+     */
     public T addClosureValToList(String key, Class clazz, Closure<?> closure) {
         this."${key}" << resolveClosure(clazz, closure)
         (T) this
     }
 
+    /**
+     * Takes a class and closure and resolves that closure into an instance of that class.
+     *
+     * @param clazz
+     * @param closure
+     * @return an instance of the class populated from the closure.
+     */
     private Object resolveClosure(Class clazz, Closure<?> closure) {
         def tmpObject = clazz.newInstance()
 
@@ -67,6 +113,11 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
         return tmpObject
     }
 
+    /**
+     * Transforms this node of the plumber model and everything below it into a simple form for later processing.
+     *
+     * @return Map of the plumber model from this node downward in a simple name/args/closures form for each closure.
+     */
     public Map toTree() {
         def tree = [:]
 
