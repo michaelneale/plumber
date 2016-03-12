@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.plumber
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.jenkinsci.plugins.plumber.model.Phase
 import org.jgrapht.DirectedGraph
 import org.jgrapht.alg.CycleDetector
 import org.jgrapht.graph.DefaultEdge
@@ -129,6 +130,28 @@ public class PlumberDependencyGraph {
      */
     public boolean hasMorePhases() {
         return !phaseGraph.vertexSet().isEmpty()
+    }
+
+    /**
+     * Generates a PlumberDependencyGraph from a list of Phases.
+     *
+     * @param phases a list of Phases
+     * @return a populated PlumberDependencyGraph
+     */
+    public static PlumberDependencyGraph fromPhaseList(List<Phase> phases) {
+        def graph = new PlumberDependencyGraph()
+
+        phases.each { p ->
+            p.before.each { before ->
+                graph.addDependency(p.name, before)
+            }
+
+            p.after.each { after ->
+                graph.addDependency(after, p.name)
+            }
+        }
+
+        graph
     }
 
     private static final int serialVersionUID = 1L

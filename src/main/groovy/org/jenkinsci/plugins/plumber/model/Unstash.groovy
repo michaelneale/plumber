@@ -21,38 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
+import static org.jenkinsci.plugins.plumber.Utils.getTabs
+import static org.jenkinsci.plugins.plumber.Utils.toArgForm
+
 @ToString
 @EqualsAndHashCode
-public class Notifications extends AbstractPlumberModel {
+public class Unstash extends AbstractPlumberModel {
+    String fromPhase
+    String dir
 
-    Map<String,MappedClosure> configs = [:]
-    Boolean allPhases = true
-    Boolean skipThisPhase = false
-    Boolean onSuccess = false
-    Boolean onFailure = true
-
-    Notifications config(String type, Closure<?> closure) {
-        addClosureValToMap("configs", MappedClosure.getClass(), type, closure)
+    Unstash fromPhase(String val) {
+        fieldVal("fromPhase", val)
     }
 
-    Notifications allPhases(Boolean val) {
-        fieldVal("allPhases", val)
+    Unstash dir(String val) {
+        fieldVal("dir", val)
     }
 
-    Notifications skipThisPhase(Boolean val) {
-        fieldVal("skipThisPhase", val)
-    }
+    public String toPipelineScript(int tabsDepth) {
+        def tabs = getTabs(tabsDepth)
 
-    Notifications onSuccess(Boolean val) {
-        fieldVal("onSuccess", val)
-    }
+        def lines = []
 
-    Notifications onFailure(Boolean val) {
-        fieldVal("onFailure", val)
+        // Just realized we don't actually have a directory parameter to unstash yet. I feel silly.
+        // Keeping the class and such as is for the moment anyway.
+        // TODO: Either add output directory support to unstash or get rid of this pointless class!
+        lines << "unstash ${toArgForm(fromPhase)}"
+        return lines.collect { "${tabs}${it}" }.join("\n")
     }
 }

@@ -21,26 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
-import groovy.json.JsonOutput
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
+@ToString
+@EqualsAndHashCode
+public class Root extends AbstractPlumberModel {
 
-public class PlumberConfig {
-    private Root root = new Root()
+    List<Phase> phases = []
+    Map<String,String> env = [:]
+    Notifications notifications
+    List<String> archiveDirs = []
+    List<String> stashDirs = []
 
-    public void fromClosure(Closure<?> closure) {
-        closure.delegate = root
-        closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.call()
+    Root phase(Closure<?> closure) {
+        addClosureValToList("phases", Phase.getClass(), closure)
     }
 
-    public Root getConfig() {
-        return root
+    Root env(Map<String,String> val) {
+        fieldVal("env", val)
     }
 
-    public String toJson() {
-        return JsonOutput.prettyPrint(JsonOutput.toJson(root))
+    Root notifications(Closure<?> closure) {
+        closureVal("notifications", Notifications.getClass(), closure)
     }
 
+    Root archiveDir(String val) {
+        addValToList("archiveDirs", val)
+    }
+
+    Root archiveDirs(List<String> val) {
+        fieldVal("archiveDirs", val)
+    }
+
+    Root archiveDirs(String... val) {
+        fieldVal("archiveDirs", val)
+    }
+
+    Root stashDir(String val) {
+        addValToList("stashDirs", val)
+    }
+
+    Root stashDirs(List<String> val) {
+        fieldVal("stashDirs", val)
+    }
+
+    Root stashDirs(String... val) {
+        fieldVal("stashDirs", val)
+    }
 }

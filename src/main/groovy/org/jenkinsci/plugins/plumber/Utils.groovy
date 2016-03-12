@@ -55,14 +55,7 @@ public class Utils {
         def bldr = new StringBuilder()
 
         tree.args.each { k, v ->
-            if (v instanceof Map) {
-                bldr.append("${tabs}${k} " + v.collect { argKey, argVal -> "${argKey}: \"${argVal}\"" }.join(", "))
-            } else if (v instanceof List || v instanceof Set) {
-                bldr.append("${tabs}${k} " + v.collect { "\"${it}\"" }.join(", "))
-            } else {
-                bldr.append("${tabs}${k} \"${v}\"")
-            }
-            bldr.append("\n\n")
+            bldr.append("${tabs}${k} ${toArgForm(v)}\n\n")
         }
 
         tree.closures.each { k, Map v ->
@@ -74,7 +67,17 @@ public class Utils {
         return bldr.toString()
     }
 
-    private static String getTabs(int tabDepth) {
+    public static String toArgForm(Object v) {
+        if (v instanceof Map) {
+            return v.collect { "${it.key}: \"${it.value}\"" }.join(", ")
+        } else if (v instanceof List || v instanceof Set) {
+            return v.collect { "\"${it}\"" }.join(", ")
+        } else {
+            return "\"${v}\""
+        }
+    }
+
+    public static String getTabs(int tabDepth) {
         "\t" * tabDepth
     }
 }

@@ -21,22 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+import groovy.json.JsonOutput
 
-@ToString
-@EqualsAndHashCode
-public class Unstash extends AbstractPlumberModel {
-    String fromPhase
-    String dir
 
-    Unstash fromPhase(String val) {
-        fieldVal("fromPhase", val)
+public class PlumberConfig {
+    private Root root = new Root()
+
+    public void fromClosure(Closure<?> closure) {
+        closure.delegate = root
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call()
     }
 
-    Unstash dir(String val) {
-        fieldVal("dir", val)
+    public Root getConfig() {
+        return root
     }
+
+    public String toJson() {
+        return JsonOutput.prettyPrint(JsonOutput.toJson(root))
+    }
+
 }

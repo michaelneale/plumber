@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
-import com.google.common.collect.ImmutableMap
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 

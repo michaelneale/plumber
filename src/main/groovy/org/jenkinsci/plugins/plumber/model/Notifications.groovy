@@ -21,54 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
 @ToString
 @EqualsAndHashCode
-public class Root extends AbstractPlumberModel {
+public class Notifications extends AbstractPlumberModel {
 
-    List<Phase> phases = []
-    Map<String,String> env = [:]
-    Notifications notifications
-    List<String> archiveDirs = []
-    List<String> stashDirs = []
+    Map<String,MappedClosure> configs = [:]
+    Boolean allPhases = true
+    Boolean skipThisPhase = false
+    Boolean onSuccess = false
+    Boolean onFailure = true
 
-    Root phase(Closure<?> closure) {
-        addClosureValToList("phases", Phase.getClass(), closure)
+    Notifications config(String type, Closure<?> closure) {
+        addClosureValToMap("configs", MappedClosure.getClass(), type, closure)
     }
 
-    Root env(Map<String,String> val) {
-        fieldVal("env", val)
+    Notifications allPhases(Boolean val) {
+        fieldVal("allPhases", val)
     }
 
-    Root notifications(Closure<?> closure) {
-        closureVal("notifications", Notifications.getClass(), closure)
+    Notifications skipThisPhase(Boolean val) {
+        fieldVal("skipThisPhase", val)
     }
 
-    Root archiveDir(String val) {
-        addValToList("archiveDirs", val)
+    Notifications onSuccess(Boolean val) {
+        fieldVal("onSuccess", val)
     }
 
-    Root archiveDirs(List<String> val) {
-        fieldVal("archiveDirs", val)
+    Notifications onFailure(Boolean val) {
+        fieldVal("onFailure", val)
     }
 
-    Root archiveDirs(String... val) {
-        fieldVal("archiveDirs", val)
-    }
-
-    Root stashDir(String val) {
-        addValToList("stashDirs", val)
-    }
-
-    Root stashDirs(List<String> val) {
-        fieldVal("stashDirs", val)
-    }
-
-    Root stashDirs(String... val) {
-        fieldVal("stashDirs", val)
-    }
 }

@@ -21,10 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+
+import static org.jenkinsci.plugins.plumber.Utils.getTabs
 
 @ToString
 @EqualsAndHashCode
@@ -107,4 +109,15 @@ public class Phase extends AbstractPlumberModel {
     Phase unstash(String from, String dir) {
         addValToList("unstash", new Unstash().fromPhase(from).dir(dir))
     }
+
+    public String toPipelineScript(int tabsDepth) {
+        def tabs = getTabs(tabsDepth)
+
+        def lines = []
+
+        // TODO: Actually write this bit.
+
+        return lines.collect { "${tabs}${it}" }.join("\n")
+    }
+
 }

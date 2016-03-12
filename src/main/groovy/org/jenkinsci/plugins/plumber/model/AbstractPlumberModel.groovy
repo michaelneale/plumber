@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.builder
+package org.jenkinsci.plugins.plumber.model
 
 import java.lang.reflect.ParameterizedType
 
 /**
- * Abstract class for other builder model classes to inherit from, so we can get a ton of convenience methods.
+ * Abstract class for other model classes to inherit from, so we can get a ton of convenience methods.
  */
 public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
 
