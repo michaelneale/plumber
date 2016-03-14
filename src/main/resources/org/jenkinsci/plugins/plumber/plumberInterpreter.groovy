@@ -49,7 +49,20 @@ class PlumberInterpreter implements Serializable {
 
                 // Phase execution
                 script.catchError {
-
+                    if (phase.action.plunger != null && !phase.action.plunger.isEmpty()) {
+                        // TODO: Write the actual step!
+                        script.runPlunger(phase.action.plunger.delegate.clone())
+                    } else if (phase.action.script != null) {
+                        if (script.isUnix()) {
+                            script.sh(phase.action.script)
+                        } else {
+                            script.bat(phase.action.script)
+                        }
+                    } else if (phase.action.inputText != null) {
+                        // Input step execution - TODO - read up on that
+                    } else {
+                        script.error("No plunger, script or inputText specified")
+                    }
                 }
 
                 // Post-phase notifier
@@ -102,6 +115,7 @@ class PlumberInterpreter implements Serializable {
 
                         config.before = before
 
+                        // TODO: Actually write the script!
                         script.runPlumberNotifier(config)
                     }
                 }
