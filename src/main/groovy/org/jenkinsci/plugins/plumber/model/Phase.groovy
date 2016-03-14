@@ -136,7 +136,7 @@ public class Phase extends AbstractPlumberModel {
      * @param root The Root this phase is in.
      * @return A map of archiveDirs, stashDirs, env and notifications
      */
-    private Map getOverrides(Root root) {
+    public Map getOverrides(Root root) {
         def overrideMap = [:]
 
         if (this.archiveDirs.isEmpty()) {

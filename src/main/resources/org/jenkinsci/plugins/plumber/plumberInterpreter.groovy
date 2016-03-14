@@ -40,8 +40,32 @@ class PlumberInterpreter implements Serializable {
 
     @NonCPS
     def constructPhase(Root root, Phase phase) {
-        return nodeLabelOrDocker(phase) {
+        def overrides = phase.getOverrides(root)
 
+        return nodeLabelOrDocker(phase) {
+            envWrapper(overrides) {
+
+            }
+        }
+    }
+
+    
+    /**
+     * Wraps the given body in a "withEnv" block set to use the properly overridden environment variables.
+     *
+     * @param overrides
+     * @param body
+     *
+     * @return a Closure
+     */
+    @NonCPS
+    private Closure envWrapper(Map overrides, Closure body) {
+        if (overrides.containsKey("env")) {
+            return script.withEnv(overrides.env.collect { k, v -> "${k}=${v}"  }) {
+                body
+            }
+        } else {
+            return body
         }
     }
 
