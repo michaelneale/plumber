@@ -30,6 +30,8 @@ import hudson.ExtensionPoint;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link ExtensionPoint} for contributing Plumber scripts. Looks for relevant script in classpath and provides the
@@ -84,5 +86,27 @@ public abstract class Plunger implements ExtensionPoint {
     public static ExtensionList<Plunger> all() {
         return ExtensionList.lookup(Plunger.class);
     }
+
+
+    /**
+     * Returns a map of all registered {@link Plunger}s by name.
+     */
+    public static Map<String,Plunger> plungerMap() {
+        Map<String,Plunger> m = new HashMap<String, Plunger>();
+
+        for (Plunger p : all()) {
+            m.put(p.getName(), p);
+        }
+
+        return m;
+    }
+
+    /**
+     * Finds a {@link Plunger} with the given name.
+     */
+    public static Plunger getPlunger(String name) {
+        return plungerMap().get(name);
+    }
+
 
 }
