@@ -28,7 +28,7 @@ import java.lang.reflect.ParameterizedType
 /**
  * Abstract class for other model classes to inherit from, so we can get a ton of convenience methods.
  */
-public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> {
+public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> implements Serializable {
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.
 

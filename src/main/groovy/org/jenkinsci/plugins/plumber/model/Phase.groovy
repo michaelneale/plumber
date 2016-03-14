@@ -165,4 +165,7 @@ public class Phase extends AbstractPlumberModel {
         overrideMap
 
     }
+
+    static final int serialVersionUID = 1L
+
 }

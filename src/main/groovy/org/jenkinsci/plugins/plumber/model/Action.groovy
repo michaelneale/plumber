@@ -93,4 +93,7 @@ public class Action extends AbstractPlumberModel {
 
         return lines.collect { "${tabs}${it}" }.join("\n")
     }
+
+    static final int serialVersionUID = 1L
+
 }

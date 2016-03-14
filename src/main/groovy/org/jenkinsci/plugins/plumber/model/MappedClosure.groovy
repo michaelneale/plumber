@@ -32,7 +32,7 @@ import groovy.transform.ToString
  */
 @ToString
 @EqualsAndHashCode
-class MappedClosure {
+class MappedClosure implements Serializable {
     @Delegate Map<String,Object> delegate = [:]
 
     /**
@@ -66,4 +66,6 @@ class MappedClosure {
 
         return tree
     }
+
+    static final int serialVersionUID = 1L
 }

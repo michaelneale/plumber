@@ -71,4 +71,7 @@ public class Root extends AbstractPlumberModel {
     Root stashDirs(String... val) {
         fieldVal("stashDirs", val)
     }
+
+    static final int serialVersionUID = 1L
+
 }

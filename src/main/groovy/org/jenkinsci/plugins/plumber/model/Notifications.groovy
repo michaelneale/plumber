@@ -56,4 +56,6 @@ public class Notifications extends AbstractPlumberModel {
         fieldVal("onFailure", val)
     }
 
+    static final int serialVersionUID = 1L
+
 }

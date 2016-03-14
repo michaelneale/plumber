@@ -54,4 +54,7 @@ public class Unstash extends AbstractPlumberModel {
         lines << "unstash ${toArgForm(fromPhase)}"
         return lines.collect { "${tabs}${it}" }.join("\n")
     }
+
+    static final int serialVersionUID = 1L
+
 }
