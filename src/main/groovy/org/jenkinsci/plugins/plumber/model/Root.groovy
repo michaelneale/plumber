@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.jenkinsci.plugins.plumber.PlumberDependencyGraph
 
 @ToString
 @EqualsAndHashCode
@@ -36,6 +37,7 @@ public class Root extends AbstractPlumberModel {
     List<String> archiveDirs = []
     List<String> stashDirs = []
     Boolean treatUnstableAsSuccess = false
+    Boolean debug = false
 
 
     Root phase(Closure<?> closure) {
@@ -78,7 +80,50 @@ public class Root extends AbstractPlumberModel {
         fieldVal("treatUnstableAsSuccess", val)
     }
 
+    Root debug(Boolean val) {
+        fieldVal("debug", val)
+    }
 
+    /**
+     * Finds a phase with the given name and returns it.
+     *
+     * @param name
+     * @return the Phase matching the name, or null if not found.
+     */
+    public Phase phaseFromName(String name) {
+        if (name != null && name != "") {
+            return phases.find { it.name == name }
+        } else {
+            return null
+        }
+    }
+
+    /**
+     * Returns a list of "execution sets" - groups of 1..n phases to be executed concurrently, with a stage name
+     * constructed from the phase names as well.
+     *
+     * @return A list of maps with "stageName" and "phases" keys.
+     */
+    public List executionSets() {
+        def graph = PlumberDependencyGraph.fromPhaseList(phases)
+
+        def exSets = []
+
+        while (graph.hasMorePhases()) {
+            def exSetDetails = [:]
+            def exSetPhaseNames = graph.getNextPhases()
+
+            exSetDetails.stageName = exSetPhaseNames.join("+")
+
+            exSetDetails.phases = exSetPhaseNames.collect { phaseFromName(it) }
+
+            exSets << exSetDetails
+
+            graph.postPhaseProcessing(exSetPhaseNames)
+        }
+
+        return exSets
+    }
 
     static final int serialVersionUID = 1L
 
