@@ -35,6 +35,7 @@ public class Notifications extends AbstractPlumberModel {
     Boolean skipThisPhase = false
     Boolean onSuccess = false
     Boolean onFailure = true
+    Boolean beforePhase = false
 
     Notifications config(String type, Closure<?> closure) {
         addClosureValToMap("configs", MappedClosure.getClass(), type, closure)
@@ -54,6 +55,10 @@ public class Notifications extends AbstractPlumberModel {
 
     Notifications onFailure(Boolean val) {
         fieldVal("onFailure", val)
+    }
+
+    Notifications beforePhase(Boolean val) {
+        fieldVal("beforePhase", val)
     }
 
     static final int serialVersionUID = 1L

@@ -35,6 +35,8 @@ public class Root extends AbstractPlumberModel {
     Notifications notifications
     List<String> archiveDirs = []
     List<String> stashDirs = []
+    Boolean treatUnstableAsSuccess = false
+
 
     Root phase(Closure<?> closure) {
         addClosureValToList("phases", Phase.getClass(), closure)
@@ -71,6 +73,12 @@ public class Root extends AbstractPlumberModel {
     Root stashDirs(String... val) {
         fieldVal("stashDirs", val)
     }
+
+    Root treatUnstableAsSuccess(Boolean val) {
+        fieldVal("treatUnstableAsSuccess", val)
+    }
+
+
 
     static final int serialVersionUID = 1L
 

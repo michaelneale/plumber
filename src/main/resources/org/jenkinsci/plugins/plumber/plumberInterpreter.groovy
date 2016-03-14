@@ -23,7 +23,8 @@
  */
 package org.jenkinsci.plugins.plumber
 
-import com.cloudbees.groovy.cps.NonCPS
+import hudson.model.Result
+import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.Root
 import org.jenkinsci.plugins.workflow.cps.CpsScript
@@ -38,18 +39,76 @@ class PlumberInterpreter implements Serializable {
     def call(Root root) {
     }
 
-    @NonCPS
     def constructPhase(Root root, Phase phase) {
         def overrides = phase.getOverrides(root)
 
         return nodeLabelOrDocker(phase) {
             envWrapper(overrides) {
+                // Pre-phase notifier.
+                generalNotifier(true, overrides, phase)
 
+                // Phase execution
+                script.catchError {
+
+                }
+
+                // Post-phase notifier
+                generalNotifier(false, overrides, phase)
             }
         }
     }
 
-    
+
+    private Closure generalNotifier(Boolean before, Map overrides, Phase phase) {
+        Notifications n = overrides.notifications
+
+        def notifySteps = []
+
+        def shouldSend = false
+
+        if (before) {
+            // We'll send pre-phase emails whenever "beforePhase" is set or if this an inputText phase.
+            if (n.beforePhase || phase.action.inputText != null) {
+                shouldSend = true
+            }
+        } else {
+            Result failureResult
+            if (overrides.treatUnstableAsSuccess) {
+                failureResult = Result.FAILURE
+            } else {
+                failureResult = Result.UNSTABLE
+            }
+
+            if (((Result)script.currentBuild.rawBuild.getResult()).isBetterThan(failureResult)) {
+                if (n.onSuccess) {
+                    shouldSend = true
+                }
+            } else {
+                if (n.onFailure) {
+                    shouldSend = true
+                }
+            }
+        }
+
+        return {
+            if (shouldSend && n.allPhases && !n.skipThisPhase) {
+                for (int i = 0; i < n.configs.entrySet().size(); i++) {
+                    def entry = n.configs.entrySet().toList().get(i)
+                    def config = entry.value?.delegate
+
+                    if (config != null) {
+                        config.type = entry.key
+                        config.phaseName = phase.name
+
+                        config.before = before
+
+                        script.runPlumberNotifier(config)
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Wraps the given body in a "withEnv" block set to use the properly overridden environment variables.
      *
@@ -58,10 +117,9 @@ class PlumberInterpreter implements Serializable {
      *
      * @return a Closure
      */
-    @NonCPS
     private Closure envWrapper(Map overrides, Closure body) {
-        if (overrides.containsKey("env")) {
-            return script.withEnv(overrides.env.collect { k, v -> "${k}=${v}"  }) {
+        if (overrides.containsKey("envList") && overrides.envList != null && !overrides.envList.isEmpty()) {
+            return script.withEnv(overrides.envList) {
                 body
             }
         } else {
@@ -77,7 +135,6 @@ class PlumberInterpreter implements Serializable {
      *
      * @return a Closure. That does things. But not too soon. Hopefully.
      */
-    @NonCPS
     private Closure nodeLabelOrDocker(Phase phase, Closure body) {
         if (phase.label != null) {
             return script.node(phase.label) {

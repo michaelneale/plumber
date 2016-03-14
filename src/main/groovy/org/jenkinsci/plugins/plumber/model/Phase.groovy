@@ -43,6 +43,7 @@ public class Phase extends AbstractPlumberModel {
     List<Unstash> unstash = []
     Notifications notifications
     Map<String,String> env = [:]
+    Boolean treatUnstableAsSuccess
 
 
     Phase name(String val) {
@@ -117,6 +118,11 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("env", val)
     }
 
+    Phase treatUnstableAsSuccess(Boolean val) {
+        fieldVal("treatUnstableAsSuccess", val)
+    }
+
+
     // Actually, I need to pass the root level in here too so that I know defaults for notifications etc.
     public String toPipelineScript(Root root, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
@@ -161,6 +167,15 @@ public class Phase extends AbstractPlumberModel {
         } else {
             overrideMap.notifications = this.notifications
         }
+
+        if (this.treatUnstableAsSuccess == null) {
+            overrideMap.treatUnstableAsSuccess = root.treatUnstableAsSuccess
+        } else {
+            overrideMap.treatUnstableAsSuccess = this.treatUnstableAsSuccess
+        }
+
+        // Shortcut to avoid having to do collect in Pipeline script.
+        overrideMap.envList = overrideMap.env.collect { k, v -> "${k}=${v}" }
 
         overrideMap
 
