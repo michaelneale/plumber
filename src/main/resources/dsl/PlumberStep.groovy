@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber
+package dsl
 
 import com.cloudbees.groovy.cps.NonCPS
 import hudson.model.Result
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
+import org.jenkinsci.plugins.plumber.model.PlumberConfig
 import org.jenkinsci.plugins.plumber.model.Root
 import org.jenkinsci.plugins.plumber.model.Unstash
 import org.jenkinsci.plugins.workflow.cps.CpsScript
@@ -38,7 +39,12 @@ class PlumberInterpreter implements Serializable {
         this.script = script;
     }
 
-    def call(Root root) {
+    def call(Closure c) {
+        PlumberConfig config = new PlumberConfig()
+        config.fromClosure(c)
+
+        Root root = config.getConfig()
+
         def executionSets = root.executionSets()
 
         for (int i = 0; i < executionSets.size(); i++) {
