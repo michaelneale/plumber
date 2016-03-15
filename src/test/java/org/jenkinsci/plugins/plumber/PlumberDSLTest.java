@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins.simplebuild;
+package org.jenkinsci.plugins.plumber;
 
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;

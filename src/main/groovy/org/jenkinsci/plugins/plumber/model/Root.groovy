@@ -39,9 +39,8 @@ public class Root extends AbstractPlumberModel {
     Boolean treatUnstableAsSuccess = false
     Boolean debug = false
 
-
     Root phase(Closure<?> closure) {
-        addClosureValToList("phases", Phase.getClass(), closure)
+        addClosureValToList("phases", Phase.class, closure)
     }
 
     Root env(Map<String,String> val) {
@@ -49,7 +48,7 @@ public class Root extends AbstractPlumberModel {
     }
 
     Root notifications(Closure<?> closure) {
-        closureVal("notifications", Notifications.getClass(), closure)
+        closureVal("notifications", Notifications.class, closure)
     }
 
     Root archiveDir(String val) {

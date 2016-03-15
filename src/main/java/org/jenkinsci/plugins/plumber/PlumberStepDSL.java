@@ -25,25 +25,40 @@ package org.jenkinsci.plugins.plumber;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.pipelinedsl.PipelineDSLHelper;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.ClassLoaderWhitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
+import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
 
 import java.io.IOException;
 
 @Extension
-public class PlumberStepDSL extends PipelineDSLHelper {
+public class PlumberStepDSL extends GlobalVariable {
     @Override
-    public String getFunctionName() {
+    public String getName() {
         return "plumber";
     }
 
+    @Override
+    public Object getValue(CpsScript script) throws Exception {
+        return script.getClass()
+                .getClassLoader()
+                .loadClass("org.jenkinsci.plugins.plumber.PlumberInterpreter")
+                .getConstructor(CpsScript.class)
+                .newInstance(script);
+    }
 
     @Extension
     public static class MiscWhitelist extends ProxyWhitelist {
         public MiscWhitelist() throws IOException {
-            super(new StaticWhitelist(
+            // TODO: Don't do this. Figure out whitelisting better.
+            super(new ClassLoaderWhitelist(PlumberStepDSL.class.getClassLoader()), new StaticWhitelist(
                     "method java.util.Map$Entry getKey",
-                    "method java.util.Map$Entry getValue"
+                    "method java.util.Map$Entry getValue",
+                    "new org.jenkinsci.plugins.plumber.model.PlumberConfig",
+                    "method org.jenkinsci.plugins.plumber.model.PlumberConfig fromClosure groovy.lang.Closure",
+                    "method org.jenkinsci.plugins.plumber.model.Root debug java.lang.Boolean"
             ));
         }
     }

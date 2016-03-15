@@ -45,7 +45,6 @@ public class Phase extends AbstractPlumberModel {
     Map<String,String> env = [:]
     Boolean treatUnstableAsSuccess
 
-
     Phase name(String val) {
         fieldVal("name", val)
     }
@@ -99,15 +98,15 @@ public class Phase extends AbstractPlumberModel {
     }
 
     Phase action(Closure<?> closure) {
-        closureVal("action", Action.getClass(), closure)
+        closureVal("action", Action.class, closure)
     }
 
     Phase notifications(Closure<?> closure) {
-        closureVal("notifications", Notifications.getClass(), closure)
+        closureVal("notifications", Notifications.class, closure)
     }
 
     Phase unstash(Closure<?> closure) {
-        addClosureValToList("unstash", Unstash.getClass(), closure)
+        addClosureValToList("unstash", Unstash.class, closure)
     }
 
     Phase unstash(String from, String dir) {

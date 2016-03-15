@@ -103,7 +103,7 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
      * @param closure
      * @return an instance of the class populated from the closure.
      */
-    private Object resolveClosure(Class clazz, Closure<?> closure) {
+    public Object resolveClosure(Class clazz, Closure<?> closure) {
         def tmpObject = clazz.newInstance()
 
         closure.resolveStrategy = Closure.DELEGATE_FIRST
@@ -186,5 +186,4 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
         return tree
     }
 
-    static final int serialVersionUID = 1L
 }

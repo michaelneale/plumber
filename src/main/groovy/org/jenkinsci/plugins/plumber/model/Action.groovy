@@ -36,18 +36,22 @@ public class Action extends AbstractPlumberModel {
     String script
     String inputText
 
+    public Action() {
+
+    }
+
     Action plunger(Closure<?> closure) {
-        closureVal("plunger", MappedClosure.getClass(), closure)
+        closureVal("plunger", MappedClosure.class, closure)
     }
 
     Action plunger(String name, Closure<?> closure) {
-        closureVal("plunger", MappedClosure.getClass(), closure)
+        closureVal("plunger", MappedClosure.class, closure)
         this.plunger."${name}" = name
         this
     }
 
     Action plunger(String val) {
-        closureVal("plunger", MappedClosure.getClass(), { name val })
+        closureVal("plunger", MappedClosure.class, { name val })
     }
 
     Action script(String script) {

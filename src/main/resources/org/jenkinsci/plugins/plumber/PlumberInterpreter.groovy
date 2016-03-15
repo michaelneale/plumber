@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dsl
+package org.jenkinsci.plugins.plumber
 
 import com.cloudbees.groovy.cps.NonCPS
 import hudson.model.Result

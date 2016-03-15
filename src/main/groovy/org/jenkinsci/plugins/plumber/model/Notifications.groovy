@@ -38,7 +38,7 @@ public class Notifications extends AbstractPlumberModel {
     Boolean beforePhase = false
 
     Notifications config(String type, Closure<?> closure) {
-        addClosureValToMap("configs", MappedClosure.getClass(), type, closure)
+        addClosureValToMap("configs", MappedClosure.class, type, closure)
     }
 
     Notifications allPhases(Boolean val) {
