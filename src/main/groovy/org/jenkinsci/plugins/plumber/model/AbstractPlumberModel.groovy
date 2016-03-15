@@ -32,6 +32,9 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.
 
+    public AbstractPlumberModel() {
+    }
+
     /**
      * Sets the given field to the given value.
      *

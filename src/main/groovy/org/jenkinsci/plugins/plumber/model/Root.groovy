@@ -111,7 +111,6 @@ public class Root extends AbstractPlumberModel {
         while (graph.hasMorePhases()) {
             def exSetDetails = [:]
             def exSetPhaseNames = graph.getNextPhases()
-
             exSetDetails.stageName = exSetPhaseNames.join("+")
 
             exSetDetails.phases = exSetPhaseNames.collect { phaseFromName(it) }

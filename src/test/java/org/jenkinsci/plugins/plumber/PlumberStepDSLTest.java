@@ -46,7 +46,7 @@ public class PlumberStepDSLTest {
     public void smokeTests() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber {\n"
+                "plumber \"\"\"\n"
                         + "  debug true\n"
                         + "  phase {\n"
                         + "    name 'pants'\n"
@@ -54,7 +54,8 @@ public class PlumberStepDSLTest {
                         + "      script 'echo hello'\n"
                         + "    }\n"
                         + "  }\n"
-                        + "}\n");
+                        + "\"\"\"\n");
+
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {

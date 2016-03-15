@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.plumber;
 import hudson.Extension;
 import org.jenkinsci.plugins.pipelinedsl.PipelineDSLHelper;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.ClassLoaderWhitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.BlanketWhitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -53,12 +54,14 @@ public class PlumberStepDSL extends GlobalVariable {
     public static class MiscWhitelist extends ProxyWhitelist {
         public MiscWhitelist() throws IOException {
             // TODO: Don't do this. Figure out whitelisting better.
-            super(new ClassLoaderWhitelist(PlumberStepDSL.class.getClassLoader()), new StaticWhitelist(
+            super(new BlanketWhitelist(), new StaticWhitelist(
                     "method java.util.Map$Entry getKey",
                     "method java.util.Map$Entry getValue",
                     "new org.jenkinsci.plugins.plumber.model.PlumberConfig",
                     "method org.jenkinsci.plugins.plumber.model.PlumberConfig fromClosure groovy.lang.Closure",
-                    "method org.jenkinsci.plugins.plumber.model.Root debug java.lang.Boolean"
+                    "method org.jenkinsci.plugins.plumber.model.Root debug java.lang.Boolean",
+                    "staticField java.lang.System err",
+                    "method java.io.PrintStream println java.lang.String"
             ));
         }
     }

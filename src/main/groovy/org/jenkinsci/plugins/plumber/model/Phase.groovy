@@ -65,11 +65,19 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("before", val)
     }
 
+    Phase before(String... val) {
+        fieldVal("before", val)
+    }
+
     Phase after(String val) {
         addValToList("after", val)
     }
 
     Phase after(List<String> val) {
+        fieldVal("after", val)
+    }
+
+    Phase after(String... val) {
         fieldVal("after", val)
     }
 

@@ -29,6 +29,8 @@ import org.jgrapht.DirectedGraph
 import org.jgrapht.alg.CycleDetector
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.SimpleDirectedGraph
+import org.jgrapht.graph.UnmodifiableDirectedGraph
+import org.jgrapht.traverse.TopologicalOrderIterator
 
 import javax.annotation.Nonnull
 
@@ -107,8 +109,9 @@ public class PlumberDependencyGraph {
      */
     public List<String> getNextPhases() {
         // Return the phases to run - can be empty.
-        return phaseGraph.findAll {
-            phaseGraph.incomingEdgesOf(it).isEmpty()
+        def iter = new TopologicalOrderIterator<String, DefaultEdge>(phaseGraph)
+        iter.findAll {
+            phaseGraph.incomingEdgesOf(it)?.isEmpty()
         }
     }
 
@@ -132,6 +135,10 @@ public class PlumberDependencyGraph {
         return !phaseGraph.vertexSet().isEmpty()
     }
 
+    public DirectedGraph<String, DefaultEdge> getGraphCopy() {
+        return new UnmodifiableDirectedGraph<String, DefaultEdge>(phaseGraph)
+    }
+
     /**
      * Generates a PlumberDependencyGraph from a list of Phases.
      *
@@ -142,6 +149,9 @@ public class PlumberDependencyGraph {
         def graph = new PlumberDependencyGraph()
 
         phases.each { p ->
+            // Make sure we add each phase even if it's not connected to anything else.
+            graph.addPhase(p.name)
+
             p.before.each { before ->
                 graph.addDependency(p.name, before)
             }

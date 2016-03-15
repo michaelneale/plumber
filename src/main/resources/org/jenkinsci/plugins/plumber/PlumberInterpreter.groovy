@@ -39,11 +39,8 @@ class PlumberInterpreter implements Serializable {
         this.script = script;
     }
 
-    def call(Closure c) {
-        PlumberConfig config = new PlumberConfig()
-        config.fromClosure(c)
-
-        Root root = config.getConfig()
+    def call(String closureString) {
+        Root root = getRootConfig(closureString)
 
         def executionSets = root.executionSets()
 
@@ -54,6 +51,20 @@ class PlumberInterpreter implements Serializable {
             script.stage exSet.stageName
             parallelizePhases(root, exSet.phases)
         }
+    }
+
+    @NonCPS
+    def getRootConfig(Closure c) {
+        def conf = new PlumberConfig()
+        conf.fromClosure(c)
+        return conf.getConfig()
+    }
+
+    @NonCPS
+    def getRootConfig(String s) {
+        def conf = new PlumberConfig()
+        conf.fromString("{ -> ${s} }")
+        return conf.getConfig()
     }
 
     def constructPhase(Root root, Phase phase) {
@@ -246,6 +257,7 @@ class PlumberInterpreter implements Serializable {
 
     private def debugLog(Boolean debug, String msg) {
         if (debug) {
+            System.err.println "PLUMBER_DEBUG: ${msg}"
             return script.echo("PLUMBER_DEBUG: ${msg}")
         } else {
             return null

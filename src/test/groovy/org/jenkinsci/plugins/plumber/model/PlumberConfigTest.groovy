@@ -23,28 +23,25 @@
  */
 package org.jenkinsci.plugins.plumber.model
 
-import groovy.json.JsonOutput
+import org.junit.Test
+import static org.junit.Assert.*;
 
-public class PlumberConfig {
-    private Root root
+class PlumberConfigTest {
+    @Test
+    public void basicConfigTest() {
+        def config = new PlumberConfig()
+        def c = {
+            phase {
+                name "foo"
+                action {
+                    script "echo hello"
+                }
+            }
+        }
 
-    public void fromString(String str) {
-        fromClosure((Closure)new GroovyShell().evaluate(str))
+        config.fromClosure(c)
+        def root = config.getConfig()
+
+        assertTrue(root.phases.size() == 1)
     }
-
-    public void fromClosure(Closure<?> closure) {
-        root = new Root()
-        closure.delegate = root
-        closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.call()
-    }
-
-    public Root getConfig() {
-        return root
-    }
-
-    public String toJson() {
-        return JsonOutput.prettyPrint(JsonOutput.toJson(root))
-    }
-
 }
