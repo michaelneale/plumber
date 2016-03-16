@@ -52,9 +52,16 @@ public abstract class Plunger implements ExtensionPoint {
      * The name of the plunger. Should be unique.
      * TODO: Figure out how to enforce uniqueness?
      * 
-     * @return The name of the contributor.
+     * @return The name of the plunger.
      */
     public abstract @Nonnull String getName();
+
+    /**
+     * The name of the class the plunger is implemented in under src/main/resources.
+     *
+     * @return The class name.
+     */
+    public abstract @Nonnull String getPlungerClass();
 
     /**
      * Get the {@link GroovyCodeSource} for this contributor. Returns the existing one if it's not null.
@@ -69,7 +76,7 @@ public abstract class Plunger implements ExtensionPoint {
         if (scriptSource == null) {
             // Expect that the script will be at package/name/className/contributorName.groovy
             URL scriptUrl = getClass().getClassLoader().getResource(getClass().getName().replace('$', '/').replace('.', '/')
-                    + '/' + getName() + ".groovy");
+                    + '/' + getPlungerClass() + ".groovy");
 
             try {
                 GroovyCodeSource gsc = new GroovyCodeSource(scriptUrl);
@@ -87,6 +94,7 @@ public abstract class Plunger implements ExtensionPoint {
 
     /**
      * ONLY TO BE RUN FROM WITHIN A CPS THREAD. Parses the script source and loads it.
+     * TODO: Decide if we want to cache the resulting objects or just *shrug* and re-parse them every time.
      *
      * @return The script object for this Plunger.
      * @throws Exception
@@ -96,13 +104,11 @@ public abstract class Plunger implements ExtensionPoint {
         if (c == null)
             throw new IllegalStateException("Expected to be called from CpsThread");
 
-        Object pipelineDSL = c.getExecution()
+        return c.getExecution()
                 .getShell()
                 .getClassLoader()
                 .parseClass(getScriptSource())
                 .newInstance();
-
-        return pipelineDSL;
     }
 
     /**
