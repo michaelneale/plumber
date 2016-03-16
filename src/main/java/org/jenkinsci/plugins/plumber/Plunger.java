@@ -27,6 +27,7 @@ package org.jenkinsci.plugins.plumber;
 import groovy.lang.GroovyCodeSource;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
+import org.jenkinsci.plugins.workflow.cps.CpsThread;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
@@ -45,39 +46,63 @@ import java.util.Map;
  */
 public abstract class Plunger implements ExtensionPoint {
 
+    private GroovyCodeSource scriptSource;
+
     /**
      * The name of the plunger. Should be unique.
      * TODO: Figure out how to enforce uniqueness?
      * 
      * @return The name of the contributor.
      */
-    public abstract @Nonnull
-    String getName();
+    public abstract @Nonnull String getName();
 
     /**
-     * Get the {@link GroovyCodeSource} for this contributor. Throws an {@link IllegalStateException} if the script
-     * can't be loaded.
-     * TODO: Probably figure out how to cache this so we don't have to load it every time.
+     * Get the {@link GroovyCodeSource} for this contributor. Returns the existing one if it's not null.
+     * Throws an {@link IllegalStateException} if the script can't be loaded.
      * TODO: Validation that the script is a valid candidate for Plumber contribution - that may be in the parsing tho.
      * TODO: Actual parsing - elsewhere, in a CPS context so that we can actually load it right.
      *
      * @return {@link GroovyCodeSource} for the contributor.
      * @throws Exception
      */
-    public GroovyCodeSource getScript() throws Exception {
-        // Expect that the script will be at package/name/className/contributorName.groovy
-        URL scriptUrl = getClass().getClassLoader().getResource(getClass().getName().replace('$', '/').replace('.', '/')
-                + '/' + getName() + ".groovy");
+    public GroovyCodeSource getScriptSource() throws Exception {
+        if (scriptSource == null) {
+            // Expect that the script will be at package/name/className/contributorName.groovy
+            URL scriptUrl = getClass().getClassLoader().getResource(getClass().getName().replace('$', '/').replace('.', '/')
+                    + '/' + getName() + ".groovy");
 
-        try {
-            GroovyCodeSource gsc = new GroovyCodeSource(scriptUrl);
-            gsc.setCachable(true);
+            try {
+                GroovyCodeSource gsc = new GroovyCodeSource(scriptUrl);
+                gsc.setCachable(true);
 
-            return gsc;
-        } catch (RuntimeException e) {
-            // Probably could be a better error message...
-            throw new IllegalStateException("Could not open script source.");
+                scriptSource = gsc;
+            } catch (RuntimeException e) {
+                // Probably could be a better error message...
+                throw new IllegalStateException("Could not open script source.");
+            }
         }
+
+        return scriptSource;
+    }
+
+    /**
+     * ONLY TO BE RUN FROM WITHIN A CPS THREAD. Parses the script source and loads it.
+     *
+     * @return The script object for this Plunger.
+     * @throws Exception
+     */
+    public Object getScript() throws Exception {
+        CpsThread c = CpsThread.current();
+        if (c == null)
+            throw new IllegalStateException("Expected to be called from CpsThread");
+
+        Object pipelineDSL = c.getExecution()
+                .getShell()
+                .getClassLoader()
+                .parseClass(getScriptSource())
+                .newInstance();
+
+        return pipelineDSL;
     }
 
     /**
