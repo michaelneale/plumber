@@ -49,7 +49,7 @@ class PlumberInterpreter implements Serializable {
 
             debugLog(root.debug, "Creating stage ${exSet.stageName}")
             script.stage exSet.stageName
-            parallelizePhases(root, exSet.phases)
+            parallelizePhases(root, exSet.phases).call()
         }
     }
 
@@ -133,8 +133,8 @@ class PlumberInterpreter implements Serializable {
                     // Post-phase notifier
                     debugLog(root.debug, "Post-phase notifier")
                     generalNotifier(false, root.debug, overrides, phase)
-                }
-            }
+                }.call()
+            }.call()
         }
     }
 
@@ -159,7 +159,9 @@ class PlumberInterpreter implements Serializable {
                 failureResult = Result.UNSTABLE
             }
 
-            if (((Result)script.currentBuild.rawBuild.getResult()).isBetterThan(failureResult)) {
+            def currentResult = script.$build().getResult()
+
+            if (currentResult == null || currentResult.isBetterThan(failureResult)) {
                 if (n.onSuccess) {
                     shouldSend = true
                 }
@@ -191,7 +193,7 @@ class PlumberInterpreter implements Serializable {
                     }
                 }
             }
-        }
+        }.call()
     }
 
     /**
@@ -208,13 +210,13 @@ class PlumberInterpreter implements Serializable {
             return {
                 debugLog(debug, "Overriding env with ${overrides.envList}")
                 script.withEnv(overrides.envList) {
-                    body
+                    body.call()
                 }
             }
         } else {
             return {
                 debugLog(debug, "No env overrides, proceeding.")
-                body
+                body.call()
             }
         }
     }
@@ -233,7 +235,7 @@ class PlumberInterpreter implements Serializable {
             return {
                 debugLog(debug, "Running in label ${phase.label}")
                 script.node(phase.label) {
-                    body
+                    body.call()
                 }
             }
         } else if (phase.dockerImage != null) {
@@ -241,7 +243,7 @@ class PlumberInterpreter implements Serializable {
                 debugLog(debug, "Running in docker image ${phase.dockerImage}")
                 script.node("docker") { // TODO: Figure out how we specify the Docker node label
                     script.docker.image(phase.dockerImage).inside() {
-                        body
+                        body.call()
                     }
                 }
             }
@@ -249,7 +251,7 @@ class PlumberInterpreter implements Serializable {
             return {
                 debugLog(debug, "Running on arbitrary node")
                 script.node {
-                    body
+                    body.call()
                 }
             }
         }
@@ -259,23 +261,23 @@ class PlumberInterpreter implements Serializable {
         if (debug) {
             System.err.println "PLUMBER_DEBUG: ${msg}"
             return script.echo("PLUMBER_DEBUG: ${msg}")
-        } else {
-            return null
         }
     }
 
-    @NonCPS
     private def parallelizePhases(Root root, List<Phase> phases) {
         return {
             debugLog(root.debug, "Checking for how to run phases...")
             if (phases.size() > 1) {
                 debugLog(root.debug, "Multiple phases in an execution set, run in parallel")
-                script.parallel(phases.collectEntries { p ->
-                    [(p.name): constructPhase(root, p)]
-                })
+                def parallelPhases = [:]
+                for (int i = 0; i < phases.size(); i++) {
+                    def phase = phases.get(i)
+                    parallelPhases[phase.name] = constructPhase(root, phase)
+                }
+                script.parallel(parallelPhases)
             } else if (!phases.isEmpty()) {
                 debugLog(root.debug, "Single phase in an execution set, run alone")
-                constructPhase(root, phases[0])
+                constructPhase(root, phases[0]).call()
             } else {
                 debugLog(root.debug, "No phases in execution set - skipping?")
             }

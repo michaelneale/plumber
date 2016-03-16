@@ -170,7 +170,11 @@ public class Phase extends AbstractPlumberModel {
         overrideMap.env.putAll(this.env)
 
         if (this.notifications == null) {
-            overrideMap.notifications = root.notifications
+            if (root.notifications != null) {
+                overrideMap.notifications = root.notifications
+            } else {
+                overrideMap.notifications = new Notifications()
+            }
         } else {
             overrideMap.notifications = this.notifications
         }

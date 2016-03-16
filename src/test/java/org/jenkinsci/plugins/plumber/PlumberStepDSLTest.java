@@ -43,7 +43,7 @@ public class PlumberStepDSLTest {
     @Rule public GitSampleRepoRule sampleRepo = new GitSampleRepoRule();
 
     @Test
-    public void smokeTests() throws Exception {
+    public void testSingleSimpleStep() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
                 "plumber \"\"\"\n"
@@ -64,6 +64,85 @@ public class PlumberStepDSLTest {
                 p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 story.j.assertLogContains("hello",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+
+
+            }
+        });
+    }
+
+    @Test
+    public void testTwoLinearSteps() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                "plumber \"\"\"\n"
+                        + "  debug true\n"
+                        + "  phase {\n"
+                        + "    name 'pants'\n"
+                        + "    action {\n"
+                        + "      script 'echo hello'\n"
+                        + "    }\n"
+                        + "  }\n"
+                        + "  phase {\n"
+                        + "    name 'trousers'\n"
+                        + "    action {\n"
+                        + "      script 'echo goodbye'\n"
+                        + "    }\n"
+                        + "    after 'pants'\n"
+                        + "  }\n"
+                        + "\"\"\"\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("hello",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogNotContains("Multiple phase",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("goodbye",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+
+
+            }
+        });
+    }
+
+    @Test
+    public void testTwoParallelSteps() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                "plumber \"\"\"\n"
+                        + "  debug true\n"
+                        + "  phase {\n"
+                        + "    name 'pants'\n"
+                        + "    action {\n"
+                        + "      script 'echo onePhase'\n"
+                        + "    }\n"
+                        + "  }\n"
+                        + "  phase {\n"
+                        + "    name 'trousers'\n"
+                        + "    action {\n"
+                        + "      script 'echo twoPhase'\n"
+                        + "    }\n"
+                        + "  }\n"
+                        + "\"\"\"\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("onePhase",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("Multiple phase",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("twoPhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
 
 
