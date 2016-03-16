@@ -111,6 +111,7 @@ class PlumberInterpreter implements Serializable {
                                 script.bat(phase.action.script)
                             }
                         } else if (phase.action.inputText != null) {
+                            // TODO: Input-related tests, like in workflow-plugin.git/aggregator/src/test/.../InputStepTest.java.
                             debugLog(root.debug, "Prompting for input with text '${phase.action.inputText}.")
                             script.input(message: phase.action.inputText, id: "${phase.name}+input")
                         } else {
