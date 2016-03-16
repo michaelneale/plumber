@@ -111,8 +111,8 @@ class PlumberInterpreter implements Serializable {
                                 script.bat(phase.action.script)
                             }
                         } else if (phase.action.inputText != null) {
-                            debugLog(root.debug, "Prompting for input.")
-                            // Input step execution - TODO - read up on that
+                            debugLog(root.debug, "Prompting for input with text '${phase.action.inputText}.")
+                            script.input(message: phase.action.inputText, id: "${phase.name}+input")
                         } else {
                             debugLog(root.debug, "ERROR: No plunger, script or inputText specified")
                             script.error("No plunger, script or inputText specified")
@@ -222,7 +222,8 @@ class PlumberInterpreter implements Serializable {
     }
 
     /**
-     * Wraps the given body in a node block, possibly with a docker.image.inside block within it as appropriate.
+     * Wraps the given body in a node block, possibly with a docker.image.inside block within it as appropriate. If the
+     * phase's action is input, don't put anything in a node at all.
      *
      * @param phase
      * @param debug
@@ -231,7 +232,13 @@ class PlumberInterpreter implements Serializable {
      * @return a Closure. That does things. But not too soon. Hopefully.
      */
     private Closure nodeLabelOrDocker(Phase phase, Boolean debug, Closure body) {
-        if (phase.label != null) {
+        if (phase.action?.inputText != null) {
+            // If we're prompting for input, don't wrap in a node.
+            return {
+                debugLog(debug, "Running on flyweight executor for input")
+                body.call()
+            }
+        } else if (phase.label != null) {
             return {
                 debugLog(debug, "Running in label ${phase.label}")
                 script.node(phase.label) {
