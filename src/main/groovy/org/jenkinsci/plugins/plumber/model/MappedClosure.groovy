@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 
 /**
@@ -32,6 +33,7 @@ import groovy.transform.ToString
  */
 @ToString
 @EqualsAndHashCode
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 class MappedClosure implements Serializable {
     @Delegate Map<String,Object> delegate = [:]
 

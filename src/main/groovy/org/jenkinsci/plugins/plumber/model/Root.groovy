@@ -26,9 +26,11 @@ package org.jenkinsci.plugins.plumber.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.jenkinsci.plugins.plumber.PlumberDependencyGraph
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 @ToString
 @EqualsAndHashCode
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Root extends AbstractPlumberModel {
 
     List<Phase> phases = []
