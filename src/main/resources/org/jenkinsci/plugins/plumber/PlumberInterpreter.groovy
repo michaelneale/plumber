@@ -100,7 +100,7 @@ class PlumberInterpreter implements Serializable {
                         if (phase.action.plunger != null && !phase.action.plunger.isEmpty()) {
                             // TODO: Write the actual step!
                             debugLog(root.debug, "Running plunger ${phase.action.plunger.name}")
-                            script.runPlunger(phase.action.plunger.delegate.clone())
+                            script.getProperty("runPlunger").call(phase.action.plunger.getMap())
                         } else if (phase.action.script != null) {
                             debugLog(root.debug, "Running script '${phase.action.script}'")
                             if (script.isUnix()) {
@@ -190,7 +190,7 @@ class PlumberInterpreter implements Serializable {
                         debugLog(debug, "Notifying to ${config.type}")
 
                         // TODO: Actually write the script!
-                        script.runPlumberNotifier(config)
+                        script.getProperty("runPlumberNotifier").call(config)
                     }
                 }
             }

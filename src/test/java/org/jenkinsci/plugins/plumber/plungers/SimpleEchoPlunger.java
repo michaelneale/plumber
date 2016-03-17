@@ -21,27 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber
+package org.jenkinsci.plugins.plumber.plungers;
 
-import com.cloudbees.groovy.cps.NonCPS
-import org.jenkinsci.plugins.workflow.cps.CpsScript
+import hudson.Extension;
+import org.jenkinsci.plugins.plumber.Plunger;
 
-// TODO: May want to move this to an actual class extending Step to avoid some weirdness.
-class RunPlunger implements Serializable {
-    CpsScript script
+@Extension
+public class SimpleEchoPlunger extends Plunger {
 
-    RunPlunger(CpsScript script) {
-        this.script = script
+    @Override
+    public String getName() {
+        return "simpleEcho";
     }
 
-    def call(Map args) {
-        String name = args?.name
-
-        return getPlunger(name).call(args)
-    }
-
-    @NonCPS
-    def getPlunger(String name) {
-        return Plunger.getPlunger(name)?.getScript(script)
+    @Override
+    public String getPlungerClass() {
+        return "SimpleEchoPlungerImpl";
     }
 }

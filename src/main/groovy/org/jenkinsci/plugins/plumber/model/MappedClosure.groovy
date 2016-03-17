@@ -57,6 +57,12 @@ class MappedClosure implements Serializable {
         this
     }
 
+    public Map<String, Object> getMap() {
+        def mapCopy = [:]
+        mapCopy.putAll(delegate)
+        return mapCopy
+    }
+
     public Map toTree() {
         def tree = [:]
 

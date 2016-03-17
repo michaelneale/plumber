@@ -60,6 +60,7 @@ public class RunPlungerDSL extends GlobalVariable {
                     "method org.jenkinsci.plugins.plumber.model.Root debug java.lang.Boolean",
                     "staticField java.lang.System err",
                     "method java.io.PrintStream println java.lang.String"
+
             ));
         }
     }

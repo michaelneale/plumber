@@ -49,7 +49,7 @@ public class Action extends AbstractPlumberModel {
     Action plunger(String name, Closure<?> closure) {
         closureVal("plunger", MappedClosure.class, closure)
         this.plunger.name = name
-        this
+        return this
     }
 
     Action plunger(String val) {

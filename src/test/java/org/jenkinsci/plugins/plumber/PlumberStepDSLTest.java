@@ -101,10 +101,8 @@ public class PlumberStepDSLTest {
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 story.j.assertLogContains("hello",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-                story.j.assertLogNotContains("Multiple phase",
-                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-                story.j.assertLogContains("goodbye",
-                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogNotContains("Multiple phase", b);
+                story.j.assertLogContains("goodbye", b);
 
 
             }
@@ -140,12 +138,8 @@ public class PlumberStepDSLTest {
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 story.j.assertLogContains("onePhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-                story.j.assertLogContains("Multiple phase",
-                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-                story.j.assertLogContains("twoPhase",
-                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-
-
+                story.j.assertLogContains("Multiple phase", b);
+                story.j.assertLogContains("twoPhase", b);
             }
         });
     }

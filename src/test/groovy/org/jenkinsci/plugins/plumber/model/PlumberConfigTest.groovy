@@ -104,4 +104,33 @@ class PlumberConfigTest {
         assertEquals("someone@else.com", overrides.notifications?.configs?.email?.to)
         assertFalse(overrides.treatUnstableAsSuccess)
     }
+
+    @Test
+    public void testPlunger() {
+        def config = new PlumberConfig()
+        def c = {
+            phase {
+                name "foo"
+                action {
+                    plunger("simpleEcho") {
+                        pants 'trousers'
+                        shirts 'polos'
+                    }
+                }
+            }
+        }
+
+        config.fromClosure(c)
+        def root = config.getConfig()
+
+        assertTrue(root.phases.size() == 1)
+        def plunger = root.phases[0].action.plunger
+        assertNotNull(plunger)
+        assertNotNull(plunger.getMap())
+
+        assertEquals("trousers", plunger.getMap().pants)
+        assertEquals("polos", plunger.getMap().shirts)
+        assertEquals("simpleEcho", plunger.getMap().name)
+    }
+
 }

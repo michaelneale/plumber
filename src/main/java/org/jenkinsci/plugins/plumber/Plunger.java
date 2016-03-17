@@ -27,12 +27,15 @@ package org.jenkinsci.plugins.plumber;
 import groovy.lang.GroovyCodeSource;
 import hudson.ExtensionList;
 import hudson.ExtensionPoint;
+import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.cps.CpsThread;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.commons.lang.exception.ExceptionUtils.getFullStackTrace;
 
 /**
  * {@link ExtensionPoint} for contributing Plumber scripts. Looks for relevant script in classpath and provides the
@@ -70,13 +73,14 @@ public abstract class Plunger implements ExtensionPoint {
      * TODO: Actual parsing - elsewhere, in a CPS context so that we can actually load it right.
      *
      * @return {@link GroovyCodeSource} for the contributor.
-     * @throws Exception
+     * @throws Exception if the script source cannot be loaded.
      */
     public GroovyCodeSource getScriptSource() throws Exception {
         if (scriptSource == null) {
+            String scriptUrlString = getClass().getPackage().getName().replace('$', '/').replace('.', '/')
+                    + '/' + getPlungerClass() + ".groovy";
             // Expect that the script will be at package/name/className/contributorName.groovy
-            URL scriptUrl = getClass().getClassLoader().getResource(getClass().getName().replace('$', '/').replace('.', '/')
-                    + '/' + getPlungerClass() + ".groovy");
+            URL scriptUrl = getClass().getClassLoader().getResource(scriptUrlString);
 
             try {
                 GroovyCodeSource gsc = new GroovyCodeSource(scriptUrl);
@@ -85,7 +89,7 @@ public abstract class Plunger implements ExtensionPoint {
                 scriptSource = gsc;
             } catch (RuntimeException e) {
                 // Probably could be a better error message...
-                throw new IllegalStateException("Could not open script source.");
+                throw new IllegalStateException("Could not open script source - " + getFullStackTrace(e));
             }
         }
 
@@ -97,9 +101,10 @@ public abstract class Plunger implements ExtensionPoint {
      * TODO: Decide if we want to cache the resulting objects or just *shrug* and re-parse them every time.
      *
      * @return The script object for this Plunger.
-     * @throws Exception
+     * @throws Exception if the script source cannot be loaded or we're called from outside a CpsThread.
      */
-    public Object getScript() throws Exception {
+    @SuppressWarnings("unchecked")
+    public Object getScript(CpsScript cpsScript) throws Exception {
         CpsThread c = CpsThread.current();
         if (c == null)
             throw new IllegalStateException("Expected to be called from CpsThread");
@@ -108,11 +113,14 @@ public abstract class Plunger implements ExtensionPoint {
                 .getShell()
                 .getClassLoader()
                 .parseClass(getScriptSource())
-                .newInstance();
+                .getConstructor(CpsScript.class)
+                .newInstance(cpsScript);
     }
 
     /**
      * Returns all the registered {@link Plunger}s.
+     *
+     * @return All {@link Plunger}s.
      */
     public static ExtensionList<Plunger> all() {
         return ExtensionList.lookup(Plunger.class);
@@ -121,6 +129,8 @@ public abstract class Plunger implements ExtensionPoint {
 
     /**
      * Returns a map of all registered {@link Plunger}s by name.
+     *
+     * @return All {@link Plunger}s keyed by name.
      */
     public static Map<String,Plunger> plungerMap() {
         Map<String,Plunger> m = new HashMap<String, Plunger>();
@@ -134,6 +144,8 @@ public abstract class Plunger implements ExtensionPoint {
 
     /**
      * Finds a {@link Plunger} with the given name.
+     *
+     * @return The plunger for the given name if it exists.
      */
     public static Plunger getPlunger(String name) {
         return plungerMap().get(name);
