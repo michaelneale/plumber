@@ -24,7 +24,9 @@
 package org.jenkinsci.plugins.plumber.model
 
 import groovy.json.JsonOutput
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class PlumberConfig {
     private Root root
 

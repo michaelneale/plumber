@@ -24,10 +24,12 @@
 package org.jenkinsci.plugins.plumber.model
 
 import java.lang.reflect.ParameterizedType
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 /**
  * Abstract class for other model classes to inherit from, so we can get a ton of convenience methods.
  */
+ @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> implements Serializable {
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.

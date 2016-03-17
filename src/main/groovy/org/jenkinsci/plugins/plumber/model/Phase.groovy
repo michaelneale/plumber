@@ -26,11 +26,13 @@ package org.jenkinsci.plugins.plumber.model
 import com.google.common.collect.ImmutableList
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 
 @ToString
 @EqualsAndHashCode
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Phase extends AbstractPlumberModel {
     String name
     List<String> before = []

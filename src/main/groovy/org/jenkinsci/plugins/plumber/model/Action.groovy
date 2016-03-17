@@ -25,12 +25,14 @@ package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 
 @ToString
 @EqualsAndHashCode
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Action extends AbstractPlumberModel {
     MappedClosure plunger
     String script

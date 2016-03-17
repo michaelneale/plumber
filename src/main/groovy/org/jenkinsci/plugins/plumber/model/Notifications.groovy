@@ -25,9 +25,11 @@ package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 @ToString
 @EqualsAndHashCode
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Notifications extends AbstractPlumberModel {
 
     Map<String,MappedClosure> configs = [:]
