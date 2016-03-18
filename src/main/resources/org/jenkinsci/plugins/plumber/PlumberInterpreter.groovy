@@ -41,6 +41,15 @@ class PlumberInterpreter implements Serializable {
 
     def call(String closureString, Boolean doCodeGen = false) {
         Root root = getRootConfig(closureString)
+        executePipeline(root, doCodeGen)
+    }
+
+    def call(Closure closure, Boolean doCodeGen = false) {
+        Root root = getRootConfig(closure)
+        executePipeline(root, doCodeGen)
+    }
+
+    private void executePipeline(Root root, Boolean doCodeGen) {
 
         if (doCodeGen) {
             String code = root.toPipelineScript().join("\n")
