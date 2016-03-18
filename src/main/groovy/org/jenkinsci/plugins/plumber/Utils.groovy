@@ -69,9 +69,17 @@ public class Utils {
 
     public static String toArgForm(Object v) {
         if (v instanceof Map) {
-            return v.collect { "${it.key}: \"${it.value}\"" }.join(", ")
+            return v.collect { "${it.key}: ${quoteValIfNeeded(it.value)}" }.join(", ")
         } else if (v instanceof List || v instanceof Set) {
-            return v.collect { "\"${it}\"" }.join(", ")
+            return v.collect { quoteValIfNeeded(it) }.join(", ")
+        } else {
+            return quoteValIfNeeded(v)
+        }
+    }
+
+    public static String quoteValIfNeeded(Object v) {
+        if (v instanceof Boolean) {
+            return v
         } else {
             return "\"${v}\""
         }
@@ -80,4 +88,5 @@ public class Utils {
     public static String getTabs(int tabDepth) {
         "\t" * tabDepth
     }
+
 }

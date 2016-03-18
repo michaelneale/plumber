@@ -85,6 +85,46 @@ public class Root extends AbstractPlumberModel {
         fieldVal("debug", val)
     }
 
+
+    public List<String> toPipelineScript(Boolean forExport = false) {
+        def lines = []
+
+        if (!forExport) {
+            lines << "def call() {"
+        }
+        executionSets().eachWithIndex { exSet, idx ->
+            lines << "stage '${exSet.stageName}'"
+            lines.addAll(parallelizePhases(idx, exSet.phases))
+        }
+        if (!forExport) {
+            lines << "}"
+            lines << "return this"
+        }
+
+        lines << ""
+        lines << Notifications.toPipelineScriptFunction()
+
+        return lines
+    }
+
+    private List<String> parallelizePhases(int exSetIndex, List<Phase> phases) {
+        def lines = []
+        String parallelVar = "parallelSet${exSetIndex}"
+        if (phases.size() > 1) {
+            lines << "def ${parallelVar} = [:]"
+            phases.each { p ->
+                lines << "${parallelVar}['${p.name}'] = {"
+                lines.addAll(p.toPipelineScript(this, 1))
+                lines << "}"
+
+            }
+            lines << "parallel ${parallelVar}"
+        } else if (!phases.isEmpty()) {
+            lines.addAll(phases[0].toPipelineScript(this, 0))
+        }
+        return lines
+    }
+
     /**
      * Finds a phase with the given name and returns it.
      *

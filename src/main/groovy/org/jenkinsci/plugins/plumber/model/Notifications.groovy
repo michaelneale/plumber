@@ -26,6 +26,9 @@ package org.jenkinsci.plugins.plumber.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import hudson.model.Result
+
+import static org.jenkinsci.plugins.plumber.Utils.getTabs
 
 @ToString
 @EqualsAndHashCode
@@ -64,5 +67,53 @@ public class Notifications extends AbstractPlumberModel {
     }
 
     static final int serialVersionUID = 1L
+
+    public static String toPipelineScriptFunction() {
+        def lines = []
+
+        lines << "def generalNotifier(String phaseName, Map<String,Boolean> flags, Map<String,Map> notifiers) {"
+        lines << "\tdef shouldSend = false"
+
+        lines << "\tif (flags.before) {"
+        lines << "\t\tif (flags.beforePhase || flags.hasInput != null) {"
+        lines << "\t\t\tshouldSend = true"
+        lines << "\t\t}"
+        lines << "\t} else {"
+        lines << "\t\tResult failureResult"
+        lines << "\t\tif (flags.treatUnstableAsSuccess) {"
+        lines << "\t\t\tfailureResult = Result.FAILURE"
+        lines << "\t\t} else {"
+        lines << "\t\t\tfailureResult = Result.UNSTABLE"
+        lines << "\t\t}"
+
+        lines << "\t\tdef currentResult = currentBuild.rawBuild.getResult()"
+        lines << "\t\tif (currentResult == null || currentResult.isBetterThan(failureResult)) {"
+        lines << "\t\t\tif (flags.onSuccess) {"
+        lines << "\t\t\t\tshouldSend = true"
+        lines << "\t\t\t}"
+        lines << "\t\t} else {"
+        lines << "\t\t\tif (flags.onFailure) {"
+        lines << "\t\t\t\tshouldSend = true"
+        lines << "\t\t\t}"
+        lines << "\t\t}"
+        lines << "\t}"
+        lines << "\n"
+        lines << "\tif (shouldSend && flags.allPhases && !flags.skipThisPhase) {"
+        lines << "\t\tfor (int i = 0; i < notifiers.entrySet().toList().size(); i++) {"
+        lines << "\t\t\tdef entry = notifiers.entrySet().toList().get(i)"
+        lines << "\t\t\tdef config = entry.value"
+        lines << "\t\t\tif (config != null) {"
+        lines << "\t\t\t\tconfig.type = entry.key"
+        lines << "\t\t\t\tconfig.phaseName = phaseName"
+        lines << "\t\t\t\tconfig.before = flags.before"
+        lines << "\t\t\t\trunPlumberNotifier(config)"
+        lines << "\t\t\t}"
+        lines << "\t\t}"
+        lines << "\t}"
+        lines << "}"
+
+        return lines.join("\n")
+
+    }
 
 }

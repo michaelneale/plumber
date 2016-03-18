@@ -29,6 +29,7 @@ import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
+import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 
 @ToString
 @EqualsAndHashCode
@@ -133,15 +134,95 @@ public class Phase extends AbstractPlumberModel {
 
 
     // Actually, I need to pass the root level in here too so that I know defaults for notifications etc.
-    public String toPipelineScript(Root root, int tabsDepth) {
+    public List<String> toPipelineScript(Root root, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
         def overrides = getOverrides(root)
+        def overridesFlagsBase = overrides.findAll { it.value instanceof Boolean }
+        def notifierFlagsBase = overrides.notifications.flags()
+        def overridesFlagsString = toArgForm(overridesFlagsBase)
 
         def lines = []
 
-        // TODO: Actually write this bit.
+        lines.addAll(nodeLabelOrDocker(overridesFlagsString, notifierFlagsBase, overrides, 0))
 
-        return lines.collect { "${tabs}${it}" }.join("\n")
+        return lines.collect { "${tabs}${it}" }
+    }
+
+    private List<String> phaseExecutionCode(String overridesFlagsString, Map<String,Boolean> notifierFlagsBase,
+                                            Map<String,Object> overrides, int tabsDepth) {
+        def lines = []
+        def tabs = getTabs(tabsDepth)
+
+        lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: true] + notifierFlagsBase)}])"
+        if (action.inputText == null) {
+            lines << "checkout scm"
+
+            if (!unstash.isEmpty()) {
+                lines.addAll(unstash.collect { it.toPipelineScript(0) })
+            }
+        }
+
+        lines << "catchError {"
+        lines.addAll(action.toPipelineScript(this, 1))
+
+        if (action.inputText == null) {
+            // Archiving and stashing.
+            if (!overrides.archiveDirs.isEmpty()) {
+                lines << "archive ${toArgForm(overrides.archiveDirs)}"
+            }
+
+            if (!overrides.stashDirs.isEmpty()) {
+                lines << "stash ${toArgForm(name)}, [${toArgForm(overrides.stashDirs)}]"
+            }
+        }
+        lines << "}"
+
+        lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: false] + notifierFlagsBase)}])"
+
+        return lines.collect { "${tabs}${it}" }
+    }
+
+    private List<String> envWrapper(String overridesFlagsString, Map<String,Boolean> notifierFlagsBase,
+                                    Map<String,Object> overrides, int tabsDepth) {
+        def tabs = getTabs(tabsDepth)
+        def lines = []
+
+        if (overrides.containsKey("envList") && overrides.envList != null && !overrides.envList.isEmpty()) {
+            lines << "withEnv([${toArgForm(overrides.envList)}]) {"
+            lines.addAll(phaseExecutionCode(overridesFlagsString, notifierFlagsBase, overrides, 1))
+            lines << "}"
+        } else {
+            lines.addAll(phaseExecutionCode(overridesFlagsString, notifierFlagsBase, overrides, 0))
+        }
+
+        return lines.collect { "${tabs}${it}" }
+    }
+
+    private List<String> nodeLabelOrDocker(String overridesFlagsString, Map<String,Boolean> notifierFlagsBase,
+                                           Map<String,Object> overrides, int tabsDepth) {
+        def lines = []
+        def tabs = getTabs(tabsDepth)
+
+        if (action?.inputText != null) {
+            // If we're prompting for input, don't wrap in a node.
+            lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 0))
+        } else if (label != null) {
+            lines << "node('${label}') {"
+            lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 1))
+            lines << "}"
+        } else if (dockerImage != null) {
+            lines << "node('docker') { // TODO: Figure out how we specify the Docker node label"
+            lines << "\tdocker.image('${dockerImage}').inside() {"
+            lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 2))
+            lines << "\t}"
+            lines << "}"
+        } else {
+            lines << "node {"
+            lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 1))
+            lines << "}"
+        }
+
+        return lines.collect { "${tabs}${it}" }
     }
 
     /**
