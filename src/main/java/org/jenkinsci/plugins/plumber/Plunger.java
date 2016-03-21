@@ -67,6 +67,15 @@ public abstract class Plunger implements ExtensionPoint {
     public abstract @Nonnull String getPlungerClass();
 
     /**
+     * Whether this plunger is a notifier.
+     *
+     * @return True if the plunger is a notifier, false otherwise.
+     */
+    public boolean isNotifier() {
+        return false;
+    }
+
+    /**
      * Get the {@link GroovyCodeSource} for this contributor. Returns the existing one if it's not null.
      * Throws an {@link IllegalStateException} if the script can't be loaded.
      * TODO: Validation that the script is a valid candidate for Plumber contribution - that may be in the parsing tho.
