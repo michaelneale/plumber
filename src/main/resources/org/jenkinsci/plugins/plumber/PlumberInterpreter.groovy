@@ -39,19 +39,40 @@ class PlumberInterpreter implements Serializable {
         this.script = script;
     }
 
-    def call(String closureString) {
+    def call(String closureString, Boolean doCodeGen = false) {
         Root root = getRootConfig(closureString)
+        executePipeline(root, doCodeGen)
+    }
 
-        def executionSets = root.executionSets()
+    def call(Closure closure, Boolean doCodeGen = false) {
+        Root root = getRootConfig(closure)
+        executePipeline(root, doCodeGen)
+    }
 
-        for (int i = 0; i < executionSets.size(); i++) {
-            def exSet = executionSets.get(i)
+    private void executePipeline(Root root, Boolean doCodeGen) {
 
-            debugLog(root.debug, "Creating stage ${exSet.stageName}")
-            script.stage exSet.stageName
-            parallelizePhases(root, exSet.phases).call()
+        if (doCodeGen) {
+            String code = root.toPipelineScript().join("\n")
+
+            def flow
+            script.node {
+                script.writeFile(file: "tmp.groovy", text: code)
+                flow = script.load "tmp.groovy"
+            }
+            flow.call()
+        } else {
+            def executionSets = root.executionSets()
+
+            for (int i = 0; i < executionSets.size(); i++) {
+                def exSet = executionSets.get(i)
+
+                debugLog(root.debug, "Creating stage ${exSet.stageName}")
+                script.stage exSet.stageName
+                parallelizePhases(root, exSet.phases).call()
+            }
         }
     }
+
 
     @NonCPS
     def getRootConfig(Closure c) {

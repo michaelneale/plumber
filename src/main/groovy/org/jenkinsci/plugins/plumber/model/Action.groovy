@@ -64,7 +64,7 @@ public class Action extends AbstractPlumberModel {
         fieldVal("inputText", inputText)
     }
 
-    public String toPipelineScript(int tabsDepth) {
+    public List<String> toPipelineScript(Phase parent, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 
         def lines = []
@@ -72,32 +72,21 @@ public class Action extends AbstractPlumberModel {
         if (script != null) {
             lines << "if (isUnix()) {"
             lines << "\tsh \"${script}\""
-            lines << "else {"
+            lines << "} else {"
             lines << "\tbat \"${script}\""
             lines << "}"
         } else if (inputText != null) {
-            // TODO: Actually read up on input step so I can write it out here.
+            lines << "\tinput(message: \"${inputText}\", id: \"${parent.name}+input\")"
         } else if (!plunger.isEmpty()) {
             // If we don't have a name we're broken.
             if (plunger.containsKey("name")) {
-                // if we've *only* got name, we've got simple output.
-                if (plunger.size() == 1) {
-                    // TODO: Write a runPlunger Pipeline step that actually does the loading and running of the plunger.
-                    lines << "runPlunger \"${plunger.get('name')}\""
-                } else {
-                    // Otherwise, we're representing a closure!
-                    lines << "runPlunger(\"${plunger.get('name')}\") {"
-                    plunger.findAll { it.key != "name" }.each { k, v ->
-                        lines << "\t${k} ${toArgForm(v)}"
-                    }
-                    lines << "}"
-                }
+                lines << "runPlunger([${toArgForm(plunger.getMap())}])"
             } else {
                 // TODO: Error out! No name!
             }
         }
 
-        return lines.collect { "${tabs}${it}" }.join("\n")
+        return lines.collect { "${tabs}${it}" }
     }
 
     static final int serialVersionUID = 1L

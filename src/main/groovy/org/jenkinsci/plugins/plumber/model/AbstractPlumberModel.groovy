@@ -29,7 +29,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 /**
  * Abstract class for other model classes to inherit from, so we can get a ton of convenience methods.
  */
- @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
+@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> implements Serializable {
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.
@@ -117,6 +117,19 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
 
         return tmpObject
     }
+
+    /**
+     * Gets any boolean fields from this class in a Map form - field name to boolean value.
+     *
+     * @return Map of string->booleans for flags.
+     */
+    public Map<String,Boolean> flags() {
+        return this.class.declaredFields.findAll { !it.synthetic && it.type == Boolean.class }.collectEntries { t ->
+            [(t.name): this."${t.name}"]
+        }
+    }
+
+
 
     /**
      * Transforms this node of the plumber model and everything below it into a simple form for later processing. 

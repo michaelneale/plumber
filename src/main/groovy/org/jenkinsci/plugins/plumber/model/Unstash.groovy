@@ -46,7 +46,7 @@ public class Unstash extends AbstractPlumberModel {
         fieldVal("dir", val)
     }
 
-    public String toPipelineScript(int tabsDepth) {
+    public List<String> toPipelineScript(int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 
         def lines = []
@@ -55,7 +55,7 @@ public class Unstash extends AbstractPlumberModel {
         // Keeping the class and such as is for the moment anyway.
         // TODO: Either add output directory support to unstash or get rid of this pointless class!
         lines << "unstash ${toArgForm(fromPhase)}"
-        return lines.collect { "${tabs}${it}" }.join("\n")
+        return lines.collect { "${tabs}${it}" }
     }
 
     static final int serialVersionUID = 1L
