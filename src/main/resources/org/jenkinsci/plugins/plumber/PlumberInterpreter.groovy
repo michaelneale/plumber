@@ -203,7 +203,7 @@ class PlumberInterpreter implements Serializable {
                     def config = entry.value?.delegate
 
                     if (config != null) {
-                        config.type = entry.key
+                        config.name = entry.key
                         config.phaseName = phase.name
 
                         config.before = before
@@ -211,7 +211,7 @@ class PlumberInterpreter implements Serializable {
                         debugLog(debug, "Notifying to ${config.type}")
 
                         // TODO: Actually write the script!
-                        script.getProperty("runPlumberNotifier").call(config)
+                        script.getProperty("runNotifier").call(config)
                     }
                 }
             }

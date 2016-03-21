@@ -123,6 +123,11 @@
         <artifactId>docker-workflow</artifactId>
         <version>1.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>plunger-plugin</artifactId>
+      <version>${plunger.version}</version>
+    </dependency>
 
     <!-- TEST deps --> 
     <dependency>
@@ -161,6 +166,7 @@
     <java.level>6</java.level>
     <groovy.version>1.8.9</groovy.version>
     <workflow.version>1.13</workflow.version>
+    <plunger.version>0.1-SNAPSHOT</plunger.version>
   </properties>
   
   <repositories>
