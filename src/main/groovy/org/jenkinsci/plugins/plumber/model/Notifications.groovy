@@ -27,6 +27,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import hudson.model.Result
+import org.apache.tools.ant.taskdefs.condition.Not
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 
@@ -41,6 +42,34 @@ public class Notifications extends AbstractPlumberModel {
     Boolean onSuccess = false
     Boolean onFailure = true
     Boolean beforePhase = false
+
+    public Notifications() {
+
+    }
+
+    public Notifications(Map<String,Object> args) {
+        if (args != null) {
+            if (args.containsKey("allPhases")) {
+                this.allPhases = args.allPhases
+            }
+            if (args.containsKey("skipThisPhase")) {
+                this.skipThisPhase = args.skipThisPhase
+            }
+            if (args.containsKey("onSuccess")) {
+                this.onSuccess = args.onSuccess
+            }
+            if (args.containsKey("onFailure")) {
+                this.onFailure = args.onFailure
+            }
+            if (args.containsKey("beforePhase")) {
+                this.beforePhase = args.beforePhase
+            }
+
+            args.configs?.each { String name, Map<String,Object> conf ->
+                this.configs."${name}" = new MappedClosure(conf)
+            }
+        }
+    }
 
     Notifications config(String type, Closure<?> closure) {
         addClosureValToMap("configs", MappedClosure.class, type, closure)

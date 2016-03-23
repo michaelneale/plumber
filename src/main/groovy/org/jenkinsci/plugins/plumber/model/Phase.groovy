@@ -48,6 +48,65 @@ public class Phase extends AbstractPlumberModel {
     Map<String,String> env = [:]
     Boolean treatUnstableAsSuccess
 
+    public Phase() {
+
+    }
+
+    public Phase(Map<String, Object> args) {
+        if (args != null) {
+            this.name = args.name
+            if (args.containsKey("before")) {
+                if (args.before instanceof String) {
+                    this.before = [(String)args.before]
+                } else if (args.before instanceof List) {
+                    this.before = (List<String>)args.before
+                }
+            }
+            if (args.containsKey("after")) {
+                if (args.after instanceof String) {
+                    this.after = [(String)args.after]
+                } else if (args.after instanceof List) {
+                    this.after = (List<String>)args.after
+                }
+            }
+            if (args.containsKey("action") && args.action instanceof Map) {
+                this.action = new Action((Map<String,Object>)args.action)
+            }
+            this.label = args.label
+            this.dockerImage = args.dockerImage
+            if (args.containsKey("archiveDirs")) {
+                if (args.archiveDirs instanceof String) {
+                    this.archiveDirs = [(String)args.archiveDirs]
+                } else if (args.archiveDirs instanceof List) {
+                    this.archiveDirs = (List<String>)args.archiveDirs
+                }
+            }
+            if (args.containsKey("stashDirs")) {
+                if (args.stashDirs instanceof String) {
+                    this.stashDirs = [(String)args.stashDirs]
+                } else if (args.stashDirs instanceof List) {
+                    this.stashDirs = (List<String>)args.stashDirs
+                }
+            }
+            if (args.containsKey("unstash") && args.unstash instanceof List) {
+                args.unstash?.each { Map<String,Object> unstashMap ->
+                    this.unstash.add(new Unstash(unstashMap))
+                }
+            }
+            if (args.containsKey("notifications") && args.notifications instanceof Map) {
+                this.notifications = new Notifications((Map<String,Object>) args.notifications)
+            }
+            if (args.containsKey("env") && args.env instanceof Map) {
+                args.env?.each { String k, String v ->
+                    this.env.put(k, v)
+                }
+            }
+            if (args.containsKey("treatUnstableAsSuccess")) {
+                this.treatUnstableAsSuccess = args.treatUnstableAsSuccess
+            }
+        }
+    }
+
     Phase name(String val) {
         fieldVal("name", val)
     }

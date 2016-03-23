@@ -38,6 +38,17 @@ public class Unstash extends AbstractPlumberModel {
     String fromPhase
     String dir
 
+    public Unstash() {
+
+    }
+
+    public Unstash(Map<String,Object> args) {
+        if (args != null) {
+            this.fromPhase = args.fromPhase
+            this.dir = args.dir
+        }
+    }
+
     Unstash fromPhase(String val) {
         fieldVal("fromPhase", val)
     }

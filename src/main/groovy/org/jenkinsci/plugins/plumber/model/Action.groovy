@@ -42,6 +42,16 @@ public class Action extends AbstractPlumberModel {
 
     }
 
+    public Action(Map<String,Object> args) {
+        if (args != null) {
+            if (args.containsKey("plunger") && args.plunger instanceof Map) {
+                this.plunger = new MappedClosure((Map<String,Object>)args.plunger)
+            }
+            this.script = args.script
+            this.inputText = args.inputText
+        }
+    }
+
     Action plunger(Closure<?> closure) {
         closureVal("plunger", MappedClosure.class, closure)
     }

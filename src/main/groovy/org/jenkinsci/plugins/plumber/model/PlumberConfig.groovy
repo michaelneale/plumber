@@ -41,6 +41,10 @@ public class PlumberConfig {
         closure.call()
     }
 
+    public void fromMap(Map<String,Object> map) {
+        root = new Root(map)
+    }
+
     public Root getConfig() {
         return root
     }

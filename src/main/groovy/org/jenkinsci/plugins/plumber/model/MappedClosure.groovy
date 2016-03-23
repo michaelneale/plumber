@@ -37,6 +37,14 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 class MappedClosure implements Serializable {
     @Delegate Map<String,Object> delegate = [:]
 
+    public MappedClosure() {
+
+    }
+
+    public MappedClosure(Map<String,Object> inMap) {
+        this.delegate.putAll(inMap)
+    }
+
     /**
      * Convenience method to allow for "foo 'bar'" style population of the underlying map.
      *
