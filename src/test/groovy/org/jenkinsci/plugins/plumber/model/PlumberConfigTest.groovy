@@ -106,13 +106,13 @@ class PlumberConfigTest {
     }
 
     @Test
-    public void testPlunger() {
+    public void testFunnel() {
         def config = new PlumberConfig()
         def c = {
             phase {
                 name "foo"
                 action {
-                    plunger("simpleEcho") {
+                    funnel("simpleEcho") {
                         pants 'trousers'
                         shirts 'polos'
                     }
@@ -124,13 +124,13 @@ class PlumberConfigTest {
         def root = config.getConfig()
 
         assertTrue(root.phases.size() == 1)
-        def plunger = root.phases[0].action.plunger
-        assertNotNull(plunger)
-        assertNotNull(plunger.getMap())
+        def funnel = root.phases[0].action.funnel
+        assertNotNull(funnel)
+        assertNotNull(funnel.getMap())
 
-        assertEquals("trousers", plunger.getMap().pants)
-        assertEquals("polos", plunger.getMap().shirts)
-        assertEquals("simpleEcho", plunger.getMap().name)
+        assertEquals("trousers", funnel.getMap().pants)
+        assertEquals("polos", funnel.getMap().shirts)
+        assertEquals("simpleEcho", funnel.getMap().name)
     }
 
     @Test

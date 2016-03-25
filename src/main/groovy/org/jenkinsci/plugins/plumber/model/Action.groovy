@@ -34,7 +34,7 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Action extends AbstractPlumberModel {
-    MappedClosure plunger
+    MappedClosure funnel
     String script
     String inputText
 
@@ -44,26 +44,26 @@ public class Action extends AbstractPlumberModel {
 
     public Action(Map<String,Object> args) {
         if (args != null) {
-            if (args.containsKey("plunger") && args.plunger instanceof Map) {
-                this.plunger = new MappedClosure((Map<String,Object>)args.plunger)
+            if (args.containsKey("funnel") && args.funnel instanceof Map) {
+                this.funnel = new MappedClosure((Map<String,Object>)args.funnel)
             }
             this.script = args.script
             this.inputText = args.inputText
         }
     }
 
-    Action plunger(Closure<?> closure) {
-        closureVal("plunger", MappedClosure.class, closure)
+    Action funnel(Closure<?> closure) {
+        closureVal("funnel", MappedClosure.class, closure)
     }
 
-    Action plunger(String name, Closure<?> closure) {
-        closureVal("plunger", MappedClosure.class, closure)
-        this.plunger.name = name
+    Action funnel(String name, Closure<?> closure) {
+        closureVal("funnel", MappedClosure.class, closure)
+        this.funnel.name = name
         return this
     }
 
-    Action plunger(String val) {
-        closureVal("plunger", MappedClosure.class, { name val })
+    Action funnel(String val) {
+        closureVal("funnel", MappedClosure.class, { name val })
     }
 
     Action script(String script) {
@@ -87,10 +87,10 @@ public class Action extends AbstractPlumberModel {
             lines << "}"
         } else if (inputText != null) {
             lines << "\tinput(message: \"${inputText}\", id: \"${parent.name}+input\")"
-        } else if (!plunger.isEmpty()) {
+        } else if (!funnel.isEmpty()) {
             // If we don't have a name we're broken.
-            if (plunger.containsKey("name")) {
-                lines << "runPlunger([${toArgForm(plunger.getMap())}])"
+            if (funnel.containsKey("name")) {
+                lines << "runFunnel([${toArgForm(funnel.getMap())}])"
             } else {
                 // TODO: Error out! No name!
             }

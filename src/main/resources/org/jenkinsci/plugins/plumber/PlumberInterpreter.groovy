@@ -118,10 +118,10 @@ class PlumberInterpreter implements Serializable {
                     debugLog(root.debug, "Executing action, wrapped in catchError")
                     // Phase execution
                     script.catchError {
-                        if (phase.action.plunger != null && !phase.action.plunger.isEmpty()) {
+                        if (phase.action.funnel != null && !phase.action.funnel.isEmpty()) {
                             // TODO: Write the actual step!
-                            debugLog(root.debug, "Running plunger ${phase.action.plunger.name}")
-                            script.getProperty("runPlunger").call(phase.action.plunger.getMap())
+                            debugLog(root.debug, "Running funnel ${phase.action.funnel.name}")
+                            script.getProperty("runFunnel").call(phase.action.funnel.getMap())
                         } else if (phase.action.script != null) {
                             debugLog(root.debug, "Running script '${phase.action.script}'")
                             if (script.isUnix()) {
@@ -136,8 +136,8 @@ class PlumberInterpreter implements Serializable {
                             debugLog(root.debug, "Prompting for input with text '${phase.action.inputText}.")
                             script.input(message: phase.action.inputText, id: "${phase.name}+input")
                         } else {
-                            debugLog(root.debug, "ERROR: No plunger, script or inputText specified")
-                            script.error("No plunger, script or inputText specified")
+                            debugLog(root.debug, "ERROR: No funnel, script or inputText specified")
+                            script.error("No funnel, script or inputText specified")
                         }
                     }
 
