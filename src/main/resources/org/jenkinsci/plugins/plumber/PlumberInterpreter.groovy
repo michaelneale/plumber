@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.plumber
 
 import com.cloudbees.groovy.cps.NonCPS
 import hudson.model.Result
+import io.jenkins.plugins.pipelinefunnel.FunnelType
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
@@ -211,7 +212,7 @@ class PlumberInterpreter implements Serializable {
                         debugLog(debug, "Notifying to ${config.type}")
 
                         // TODO: Actually write the script!
-                        script.getProperty("runNotifier").call(config)
+                        script.getProperty("runFunnel").call(FunnelType.NOTIFIER, config)
                     }
                 }
             }

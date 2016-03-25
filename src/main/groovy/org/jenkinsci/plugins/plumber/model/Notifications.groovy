@@ -135,7 +135,7 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t\t\t\tconfig.name = entry.key"
         lines << "\t\t\t\tconfig.phaseName = phaseName"
         lines << "\t\t\t\tconfig.before = flags.before"
-        lines << "\t\t\t\trunNotifier(config)"
+        lines << "\t\t\t\trunFunnel('notifier', config)"
         lines << "\t\t\t}"
         lines << "\t\t}"
         lines << "\t}"
