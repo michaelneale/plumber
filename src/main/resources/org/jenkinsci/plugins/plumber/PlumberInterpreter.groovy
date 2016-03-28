@@ -50,6 +50,11 @@ class PlumberInterpreter implements Serializable {
         executePipeline(root, doCodeGen)
     }
 
+    def call(Map config, Boolean doCodeGen = false) {
+        Root root = getRootConfig(config)
+        executePipeline(root, doCodeGen)
+    }
+
     private void executePipeline(Root root, Boolean doCodeGen) {
 
         if (doCodeGen) {
@@ -86,6 +91,13 @@ class PlumberInterpreter implements Serializable {
     def getRootConfig(String s) {
         def conf = new PlumberConfig()
         conf.fromString("{ -> ${s} }")
+        return conf.getConfig()
+    }
+
+    @NonCPS
+    def getRootConfig(Map m) {
+        def conf = new PlumberConfig()
+        conf.fromMap(m)
         return conf.getConfig()
     }
 

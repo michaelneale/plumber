@@ -61,8 +61,8 @@ public class Root extends AbstractPlumberModel {
                     this.stashDirs = (List<String>)args.stashDirs
                 }
             }
-            if (args.containsKey("phase") && args.phase instanceof List) {
-                args.phase?.each { Map<String,Object> phaseMap ->
+            if (args.containsKey("phases") && args.phases instanceof List) {
+                args.phases?.each { Map<String,Object> phaseMap ->
                     this.phases.add(new Phase(phaseMap))
                 }
             }

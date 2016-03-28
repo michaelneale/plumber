@@ -153,7 +153,7 @@ class PlumberConfigTest {
 
                 treatUnstableAsSuccess: true,
 
-                phase: [
+                phases: [
                         [name: "overridePhase",
                          env: ["foo": "banana", "pants": "trousers"],
                          archiveDirs: "third/dir",
