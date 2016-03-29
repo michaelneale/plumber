@@ -25,7 +25,7 @@ package org.jenkinsci.plugins.plumber
 
 import com.cloudbees.groovy.cps.NonCPS
 import hudson.model.Result
-import io.jenkins.plugins.pipelinefunnel.FunnelType
+import io.jenkins.plugins.pipelineaction.PipelineActionType
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
@@ -131,26 +131,14 @@ class PlumberInterpreter implements Serializable {
                     debugLog(root.debug, "Executing action, wrapped in catchError")
                     // Phase execution
                     script.catchError {
-                        if (phase.action.funnel != null && !phase.action.funnel.isEmpty()) {
+                        def actionMap = phase.action?.getMap()
+                        if (actionMap != null && !actionMap.isEmpty()) {
                             // TODO: Write the actual step!
-                            debugLog(root.debug, "Running funnel ${phase.action.funnel.name}")
-                            script.getProperty("runFunnel").call(phase.action.funnel.getMap())
-                        } else if (phase.action.script != null) {
-                            debugLog(root.debug, "Running script '${phase.action.script}'")
-                            if (script.isUnix()) {
-                                debugLog(root.debug, "...on Unix, so sh.")
-                                script.sh(phase.action.script)
-                            } else {
-                                debugLog(root.debug, "...not on Unix, so bat.")
-                                script.bat(phase.action.script)
-                            }
-                        } else if (phase.action.inputText != null) {
-                            // TODO: Input-related tests, like in workflow-plugin.git/aggregator/src/test/.../InputStepTest.java.
-                            debugLog(root.debug, "Prompting for input with text '${phase.action.inputText}.")
-                            script.input(message: phase.action.inputText, id: "${phase.name}+input")
+                            debugLog(root.debug, "Running action ${actionMap.type ?: 'script'}")
+                            script.getProperty("runPipelineAction").call(actionMap)
                         } else {
-                            debugLog(root.debug, "ERROR: No funnel, script or inputText specified")
-                            script.error("No funnel, script or inputText specified")
+                            debugLog(root.debug, "ERROR: No action specified")
+                            script.error("No action specified")
                         }
                     }
 
@@ -180,10 +168,11 @@ class PlumberInterpreter implements Serializable {
         def notifySteps = []
 
         def shouldSend = false
+        def actionConfig = phase?.action?.getMap()
 
         if (before) {
-            // We'll send pre-phase emails whenever "beforePhase" is set or if this an inputText phase.
-            if (n.beforePhase || phase.action.inputText != null) {
+            // We'll send pre-phase emails whenever "beforePhase" is set or if this an input phase.
+            if (n.beforePhase || (actionConfig != null && actionConfig.type == "input")) {
                 shouldSend = true
             }
         } else {
@@ -216,7 +205,7 @@ class PlumberInterpreter implements Serializable {
                     def config = entry.value?.delegate
 
                     if (config != null) {
-                        config.name = entry.key
+                        config.type = entry.key
                         config.phaseName = phase.name
 
                         config.before = before
@@ -224,7 +213,7 @@ class PlumberInterpreter implements Serializable {
                         debugLog(debug, "Notifying to ${config.type}")
 
                         // TODO: Actually write the script!
-                        script.getProperty("runFunnel").call(FunnelType.NOTIFIER, config)
+                        script.getProperty("runPipelineAction").call(PipelineActionType.NOTIFIER, config)
                     }
                 }
             }
@@ -267,7 +256,9 @@ class PlumberInterpreter implements Serializable {
      * @return a Closure. That does things. But not too soon. Hopefully.
      */
     private Closure nodeLabelOrDocker(Phase phase, Boolean debug, Closure body) {
-        if (phase.action?.inputText != null) {
+        def actionConfig = phase?.action?.getMap()
+
+        if (actionConfig != null && actionConfig.type == "input") {
             // If we're prompting for input, don't wrap in a node.
             return {
                 debugLog(debug, "Running on flyweight executor for input")

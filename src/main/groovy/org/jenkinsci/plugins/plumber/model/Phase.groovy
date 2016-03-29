@@ -212,8 +212,10 @@ public class Phase extends AbstractPlumberModel {
         def lines = []
         def tabs = getTabs(tabsDepth)
 
+        def actionConfig = action?.actionConfig?.getMap()
+
         lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: true] + notifierFlagsBase)}])"
-        if (action.inputText == null) {
+        if (actionConfig != null && actionConfig.type != "input") {
             lines << "checkout scm"
 
             if (!unstash.isEmpty()) {
@@ -224,7 +226,7 @@ public class Phase extends AbstractPlumberModel {
         lines << "catchError {"
         lines.addAll(action.toPipelineScript(this, 1))
 
-        if (action.inputText == null) {
+        if (actionConfig != null && actionConfig.type != "input") {
             // Archiving and stashing.
             if (!overrides.archiveDirs.isEmpty()) {
                 lines << "archive ${toArgForm(overrides.archiveDirs)}"
@@ -262,7 +264,8 @@ public class Phase extends AbstractPlumberModel {
         def lines = []
         def tabs = getTabs(tabsDepth)
 
-        if (action?.inputText != null) {
+        def actionConfig = action?.actionConfig?.getMap()
+        if (actionConfig != null && actionConfig.type == "input") {
             // If we're prompting for input, don't wrap in a node.
             lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 0))
         } else if (label != null) {

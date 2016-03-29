@@ -33,67 +33,16 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
-public class Action extends AbstractPlumberModel {
-    MappedClosure funnel
-    String script
-    String inputText
-
-    public Action() {
-
-    }
-
-    public Action(Map<String,Object> args) {
-        if (args != null) {
-            if (args.containsKey("funnel") && args.funnel instanceof Map) {
-                this.funnel = new MappedClosure((Map<String,Object>)args.funnel)
-            }
-            this.script = args.script
-            this.inputText = args.inputText
-        }
-    }
-
-    Action funnel(Closure<?> closure) {
-        closureVal("funnel", MappedClosure.class, closure)
-    }
-
-    Action funnel(String name, Closure<?> closure) {
-        closureVal("funnel", MappedClosure.class, closure)
-        this.funnel.name = name
-        return this
-    }
-
-    Action funnel(String val) {
-        closureVal("funnel", MappedClosure.class, { name val })
-    }
-
-    Action script(String script) {
-        fieldVal("script", script)
-    }
-
-    Action inputText(String inputText) {
-        fieldVal("inputText", inputText)
-    }
+public class Action extends MappedClosure {
 
     public List<String> toPipelineScript(Phase parent, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 
         def lines = []
 
-        if (script != null) {
-            lines << "if (isUnix()) {"
-            lines << "\tsh \"${script}\""
-            lines << "} else {"
-            lines << "\tbat \"${script}\""
-            lines << "}"
-        } else if (inputText != null) {
-            lines << "\tinput(message: \"${inputText}\", id: \"${parent.name}+input\")"
-        } else if (!funnel.isEmpty()) {
-            // If we don't have a name we're broken.
-            if (funnel.containsKey("name")) {
-                lines << "runFunnel([${toArgForm(funnel.getMap())}])"
-            } else {
-                // TODO: Error out! No name!
-            }
+        if (getMap() != null && !getMap().isEmpty()) {
+            // If we don't have a name we're assuming it's a script.
+            lines << "runPipelineAction([${toArgForm(getMap())}])"
         }
 
         return lines.collect { "${tabs}${it}" }
