@@ -134,7 +134,7 @@ class PlumberInterpreter implements Serializable {
                         def actionMap = phase.action?.getMap()
                         if (actionMap != null && !actionMap.isEmpty()) {
                             // TODO: Write the actual step!
-                            debugLog(root.debug, "Running action ${actionMap.type ?: 'script'}")
+                            debugLog(root.debug, "Running action ${actionMap.name ?: 'script'}")
                             script.getProperty("runPipelineAction").call(actionMap)
                         } else {
                             debugLog(root.debug, "ERROR: No action specified")
@@ -172,7 +172,7 @@ class PlumberInterpreter implements Serializable {
 
         if (before) {
             // We'll send pre-phase emails whenever "beforePhase" is set or if this an input phase.
-            if (n.beforePhase || (actionConfig != null && actionConfig.type == "input")) {
+            if (n.beforePhase || (actionConfig != null && actionConfig.name == "input")) {
                 shouldSend = true
             }
         } else {
@@ -205,12 +205,12 @@ class PlumberInterpreter implements Serializable {
                     def config = entry.value?.delegate
 
                     if (config != null) {
-                        config.type = entry.key
+                        config.name = entry.key
                         config.phaseName = phase.name
 
                         config.before = before
 
-                        debugLog(debug, "Notifying to ${config.type}")
+                        debugLog(debug, "Notifying to ${config.name}")
 
                         // TODO: Actually write the script!
                         script.getProperty("runPipelineAction").call(PipelineActionType.NOTIFIER, config)
@@ -258,7 +258,7 @@ class PlumberInterpreter implements Serializable {
     private Closure nodeLabelOrDocker(Phase phase, Boolean debug, Closure body) {
         def actionConfig = phase?.action?.getMap()
 
-        if (actionConfig != null && actionConfig.type == "input") {
+        if (actionConfig != null && actionConfig.name == "input") {
             // If we're prompting for input, don't wrap in a node.
             return {
                 debugLog(debug, "Running on flyweight executor for input")

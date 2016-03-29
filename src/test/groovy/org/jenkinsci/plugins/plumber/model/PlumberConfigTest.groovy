@@ -112,7 +112,7 @@ class PlumberConfigTest {
             phase {
                 name "foo"
                 action {
-                    type "simpleEcho"
+                    name "simpleEcho"
                     pants 'trousers'
                     shirts 'polos'
                 }
@@ -129,7 +129,7 @@ class PlumberConfigTest {
 
         assertEquals("trousers", actionConfig.getMap().pants)
         assertEquals("polos", actionConfig.getMap().shirts)
-        assertEquals("simpleEcho", actionConfig.getMap().type)
+        assertEquals("simpleEcho", actionConfig.getMap().name)
     }
 
     @Test

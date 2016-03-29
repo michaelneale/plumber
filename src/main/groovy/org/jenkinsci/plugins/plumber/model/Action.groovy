@@ -23,15 +23,11 @@
  */
 package org.jenkinsci.plugins.plumber.model
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 
-@ToString
-@EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Action extends MappedClosure {
 
@@ -47,7 +43,5 @@ public class Action extends MappedClosure {
 
         return lines.collect { "${tabs}${it}" }
     }
-
-    static final int serialVersionUID = 1L
 
 }
