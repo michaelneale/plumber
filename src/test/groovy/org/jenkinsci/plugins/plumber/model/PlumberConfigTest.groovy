@@ -189,4 +189,42 @@ class PlumberConfigTest {
         assertFalse(overrides.treatUnstableAsSuccess)
     }
 
+    @Test
+    public void testMatrix() {
+        def config = new PlumberConfig()
+        def c = {
+            phase {
+                name "foo"
+                matrix {
+                    axes {
+                        "FOO" "bar", "baz"
+                    }
+                }
+                action {
+                    script "echo hello"
+                }
+            }
+        }
+
+        config.fromClosure(c)
+        def root = config.getConfig()
+
+        assertTrue(root.phases.size() == 1)
+
+        def executionSets = root.executionSets()
+
+        assertTrue(executionSets.size() == 1)
+
+        def phasesFromExSet = executionSets.first().phases
+
+        assertTrue(phasesFromExSet.size() == 2)
+
+        assertTrue(phasesFromExSet.any { Phase p ->
+            p.name == "foo+FOO=bar" && p.env != null && p.env.get("FOO") != null && p.env.get("FOO") == "bar"
+        })
+        assertTrue(phasesFromExSet.any { Phase p ->
+            p.name == "foo+FOO=baz" && p.env != null && p.env.get("FOO") != null && p.env.get("FOO") == "baz"
+        })
+    }
+
 }

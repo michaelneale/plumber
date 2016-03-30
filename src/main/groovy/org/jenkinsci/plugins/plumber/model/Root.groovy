@@ -197,7 +197,31 @@ public class Root extends AbstractPlumberModel {
             def exSetPhaseNames = graph.getNextPhases()
             exSetDetails.stageName = exSetPhaseNames.join("+")
 
-            exSetDetails.phases = exSetPhaseNames.collect { phaseFromName(it) }
+            exSetDetails.phases = []
+
+            // Look for phases with matrix axes and transform them - add everything else automatically
+            exSetPhaseNames.collect { phaseFromName(it) }.each { Phase p ->
+                // If no matrix, just add it.
+                if (p.matrix == null || p.matrix.matrixCombinations().isEmpty()) {
+                    exSetDetails.phases << p
+                } else if (p.matrix.matrixCombinations().size() == 1) {
+                    // If there's only one set of combinations, add it, with the axes added to the environment.
+                    Phase newPhase = p.clone()
+                    newPhase.addToEnv(p.matrix.matrixCombinations().first())
+
+                    exSetDetails.phases << newPhase
+                } else {
+                    p.matrix.matrixCombinations().each { Map<String,Object> thisCombo ->
+                        Phase newPhase = p.clone()
+                        newPhase.addToEnv(thisCombo)
+                        newPhase.name = p.name + "+" + thisCombo.collect { k, v ->
+                            "${k}=${v}"
+                        }.join(",")
+
+                        exSetDetails.phases << newPhase
+                    }
+                }
+            }
 
             exSets << exSetDetails
 

@@ -47,6 +47,7 @@ public class Phase extends AbstractPlumberModel {
     Notifications notifications
     Map<String,String> env = [:]
     Boolean treatUnstableAsSuccess
+    Matrix matrix
 
     public Phase() {
 
@@ -100,6 +101,9 @@ public class Phase extends AbstractPlumberModel {
                 args.env?.each { String k, String v ->
                     this.env.put(k, v)
                 }
+            }
+            if (args.containsKey("matrix") && args.matrix instanceof Map) {
+                this.matrix = new Matrix((Map<String,Object>)args.matrix)
             }
             if (args.containsKey("treatUnstableAsSuccess")) {
                 this.treatUnstableAsSuccess = args.treatUnstableAsSuccess
@@ -171,6 +175,10 @@ public class Phase extends AbstractPlumberModel {
         closureVal("action", Action.class, closure)
     }
 
+    Phase matrix(Closure<?> closure) {
+        closureVal("matrix", Matrix.class, closure)
+    }
+
     Phase notifications(Closure<?> closure) {
         closureVal("notifications", Notifications.class, closure)
     }
@@ -191,6 +199,13 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("treatUnstableAsSuccess", val)
     }
 
+    public void addToEnv(String key, Object value) {
+        this.env."${key}" = value
+    }
+
+    public void addToEnv(Map<String, Object> inputMap) {
+        this.env.putAll(inputMap)
+    }
 
     // Actually, I need to pass the root level in here too so that I know defaults for notifications etc.
     public List<String> toPipelineScript(Root root, int tabsDepth) {
