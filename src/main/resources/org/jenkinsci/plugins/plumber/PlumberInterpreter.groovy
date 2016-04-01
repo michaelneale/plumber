@@ -25,7 +25,9 @@ package org.jenkinsci.plugins.plumber
 
 import com.cloudbees.groovy.cps.NonCPS
 import hudson.model.Result
+import io.jenkins.plugins.pipelineaction.PipelineAction
 import io.jenkins.plugins.pipelineaction.PipelineActionType
+import org.jenkinsci.plugins.plumber.model.Action
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
@@ -168,11 +170,11 @@ class PlumberInterpreter implements Serializable {
         def notifySteps = []
 
         def shouldSend = false
-        def actionConfig = phase?.action?.getMap()
+        def actualAction = getActualAction(phase.action)
 
         if (before) {
             // We'll send pre-phase emails whenever "beforePhase" is set or if this an input phase.
-            if (n.beforePhase || (actionConfig != null && actionConfig.name == "input")) {
+            if (n.beforePhase || (actualAction != null && actualAction.name == "input")) {
                 shouldSend = true
             }
         } else {
@@ -256,9 +258,9 @@ class PlumberInterpreter implements Serializable {
      * @return a Closure. That does things. But not too soon. Hopefully.
      */
     private Closure nodeLabelOrDocker(Phase phase, Boolean debug, Closure body) {
-        def actionConfig = phase?.action?.getMap()
+        def actualAction = getActualAction(phase.action)
 
-        if (actionConfig != null && actionConfig.name == "input") {
+        if (actualAction != null && !actualAction.usesNode()) {
             // If we're prompting for input, don't wrap in a node.
             return {
                 debugLog(debug, "Running on flyweight executor for input")
@@ -315,5 +317,14 @@ class PlumberInterpreter implements Serializable {
                 debugLog(root.debug, "No phases in execution set - skipping?")
             }
         }
+    }
+
+    private PipelineAction getActualAction(Action action, PipelineActionType type = PipelineActionType.STANDARD) {
+        def actionConfig = action?.actionConfig?.getMap()
+        PipelineAction actionClass
+        if (actionConfig != null && !actionConfig.isEmpty() && actionConfig.name != null) {
+            actionClass = PipelineAction.getPipelineAction(actionConfig.name, type)
+        }
+        return actionClass
     }
 }

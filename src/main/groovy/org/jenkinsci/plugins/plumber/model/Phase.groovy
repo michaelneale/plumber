@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.jenkins.plugins.pipelineaction.PipelineAction
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
@@ -229,8 +230,13 @@ public class Phase extends AbstractPlumberModel {
 
         def actionConfig = action?.actionConfig?.getMap()
 
+        PipelineAction actionClass
+        if (actionConfig != null && !actionConfig.isEmpty() && actionConfig.name != null) {
+            actionClass = PipelineAction.getPipelineAction(actionConfig.name)
+        }
+
         lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: true] + notifierFlagsBase)}])"
-        if (actionConfig != null && actionConfig.name != "input") {
+        if (actionClass != null && actionClass.usesNode()) {
             lines << "checkout scm"
 
             if (!unstash.isEmpty()) {
@@ -241,7 +247,7 @@ public class Phase extends AbstractPlumberModel {
         lines << "catchError {"
         lines.addAll(action.toPipelineScript(this, 1))
 
-        if (actionConfig != null && actionConfig.name != "input") {
+        if (actionClass != null && actionClass.usesNode()) {
             // Archiving and stashing.
             if (!overrides.archiveDirs.isEmpty()) {
                 lines << "archive ${toArgForm(overrides.archiveDirs)}"
@@ -280,8 +286,12 @@ public class Phase extends AbstractPlumberModel {
         def tabs = getTabs(tabsDepth)
 
         def actionConfig = action?.actionConfig?.getMap()
-        if (actionConfig != null && actionConfig.name == "input") {
-            // If we're prompting for input, don't wrap in a node.
+        PipelineAction actionClass
+        if (actionConfig != null && !actionConfig.isEmpty() && actionConfig.name != null) {
+            actionClass = PipelineAction.getPipelineAction(actionConfig.name)
+        }
+        if (actionClass != null && !actionClass.usesNode()) {
+            // If we're running an action that doesn't have usesNode()==true, don't wrap in a node.
             lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 0))
         } else if (label != null) {
             lines << "node('${label}') {"
