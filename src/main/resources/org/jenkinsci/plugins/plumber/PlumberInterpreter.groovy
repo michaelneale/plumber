@@ -28,6 +28,7 @@ import hudson.model.Result
 import io.jenkins.plugins.pipelineaction.PipelineAction
 import io.jenkins.plugins.pipelineaction.PipelineActionType
 import org.jenkinsci.plugins.plumber.model.Action
+import org.jenkinsci.plugins.plumber.model.MappedClosure
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
@@ -202,21 +203,10 @@ class PlumberInterpreter implements Serializable {
             debugLog(debug, "Checking if should send notifications...")
             if (shouldSend && n.allPhases && !n.skipThisPhase) {
                 debugLog(debug, "And should send notifications!")
-                for (int i = 0; i < n.configs.entrySet().size(); i++) {
-                    def entry = n.configs.entrySet().toList().get(i)
-                    def config = entry.value?.delegate
-
-                    if (config != null) {
-                        config.name = entry.key
-                        config.phaseName = phase.name
-
-                        config.before = before
-
-                        debugLog(debug, "Notifying to ${config.name}")
-
-                        // TODO: Actually write the script!
-                        script.getProperty("runPipelineAction").call(PipelineActionType.NOTIFIER, config)
-                    }
+                def notifiers = getNotifiers(phase.name, before, n.configs)
+                for (int i = 0; i < notifiers.size(); i++) {
+                    def thisNotifier = notifiers.get(i)
+                    script.getProperty("runPipelineAction").call(PipelineActionType.NOTIFIER, thisNotifier)
                 }
             }
         }.call()
@@ -326,5 +316,21 @@ class PlumberInterpreter implements Serializable {
             actionClass = PipelineAction.getPipelineAction(actionConfig.name, type)
         }
         return actionClass
+    }
+
+    @NonCPS
+    private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, Map<String,MappedClosure> configs) {
+        def notifiers = []
+        configs.each { k, v ->
+            def conf = v?.getMap()
+            if (conf != null) {
+                conf.name = k
+                conf.phaseName = phaseName
+                conf.before = before
+                notifiers << conf
+            }
+        }
+
+        return notifiers
     }
 }

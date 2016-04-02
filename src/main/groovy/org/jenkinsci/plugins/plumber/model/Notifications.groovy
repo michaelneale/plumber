@@ -26,10 +26,6 @@ package org.jenkinsci.plugins.plumber.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import hudson.model.Result
-import org.apache.tools.ant.taskdefs.condition.Not
-
-import static org.jenkinsci.plugins.plumber.Utils.getTabs
 
 @ToString
 @EqualsAndHashCode
@@ -128,17 +124,26 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t}"
         lines << "\n"
         lines << "\tif (shouldSend && flags.allPhases && !flags.skipThisPhase) {"
-        lines << "\t\tfor (int i = 0; i < notifiers.entrySet().toList().size(); i++) {"
-        lines << "\t\t\tdef entry = notifiers.entrySet().toList().get(i)"
-        lines << "\t\t\tdef config = entry.value"
-        lines << "\t\t\tif (config != null) {"
-        lines << "\t\t\t\tconfig.type = entry.key"
-        lines << "\t\t\t\tconfig.phaseName = phaseName"
-        lines << "\t\t\t\tconfig.before = flags.before"
-        lines << "\t\t\t\trunPipelineAction('notifier', config)"
-        lines << "\t\t\t}"
+        lines << "\t\tdef notifiers = getNotifiers(phase.name, before, n.configs)"
+        lines << "\t\tfor (int i = 0; i < notifiers.size(); i++) {"
+        lines << "\t\t\tdef thisNotifier = notifiers.get(i)"
+        lines << "\t\t\tscript.getProperty('runPipelineAction').call(PipelineActionType.NOTIFIER, thisNotifier)"
         lines << "\t\t}"
         lines << "\t}"
+        lines << "}"
+        lines << "@NonCPS"
+        lines << "private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, Map<String,MappedClosure> configs) {"
+        lines << "\tdef notifiers = []"
+        lines << "\tconfigs.each { k, v ->"
+        lines << "\t\tdef conf = v?.getMap()"
+        lines << "\t\tif (conf != null) {"
+        lines << "\t\t\tconf.name = k"
+        lines << "\t\t\tconf.phaseName = phaseName"
+        lines << "\t\t\tconf.before = before"
+        lines << "\t\t\tnotifiers << conf"
+        lines << "\t\t}"
+        lines << "\t}"
+        lines << "\treturn notifiers"
         lines << "}"
 
         return lines.join("\n")
