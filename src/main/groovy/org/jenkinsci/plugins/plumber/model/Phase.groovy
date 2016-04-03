@@ -49,6 +49,8 @@ public class Phase extends AbstractPlumberModel {
     Map<String,String> env = [:]
     Boolean treatUnstableAsSuccess
     Matrix matrix
+    List<SCM> scms = []
+    Boolean skipSCM
 
     public Phase() {
 
@@ -90,6 +92,11 @@ public class Phase extends AbstractPlumberModel {
                     this.stashDirs = (List<String>)args.stashDirs
                 }
             }
+            if (args.containsKey("scm") && args.scm instanceof List) {
+                args.scm?.each { Map<String,Object> scmMap ->
+                    this.scms.add(new SCM(scmMap))
+                }
+            }
             if (args.containsKey("unstash") && args.unstash instanceof List) {
                 args.unstash?.each { Map<String,Object> unstashMap ->
                     this.unstash.add(new Unstash(unstashMap))
@@ -108,6 +115,9 @@ public class Phase extends AbstractPlumberModel {
             }
             if (args.containsKey("treatUnstableAsSuccess")) {
                 this.treatUnstableAsSuccess = args.treatUnstableAsSuccess
+            }
+            if (args.containsKey("skipSCM")) {
+                this.skipSCM = args.skipSCM
             }
         }
     }
@@ -192,12 +202,20 @@ public class Phase extends AbstractPlumberModel {
         addValToList("unstash", new Unstash().fromPhase(from).dir(dir))
     }
 
+    Phase scm(Closure<?> closure) {
+        addClosureValToList("scms", SCM.class, closure)
+    }
+
     Phase env(Map<String,String> val) {
         fieldVal("env", val)
     }
 
     Phase treatUnstableAsSuccess(Boolean val) {
         fieldVal("treatUnstableAsSuccess", val)
+    }
+
+    Phase skipSCM(Boolean val) {
+        fieldVal("skipSCM", val)
     }
 
     public void addToEnv(String key, Object value) {
@@ -237,7 +255,15 @@ public class Phase extends AbstractPlumberModel {
 
         lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: true] + notifierFlagsBase)}])"
         if (actionClass != null && actionClass.usesNode()) {
-            lines << "checkout scm"
+            if (!overrides.skipSCM) {
+                if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
+                    overrides.scms.each { SCM s ->
+                        lines.addAll(s.toPipelineScript(this, 0))
+                    }
+                } else {
+                    lines << "checkout scm"
+                }
+            }
 
             if (!unstash.isEmpty()) {
                 lines.addAll(unstash.collect { it.toPipelineScript(0) })
@@ -313,11 +339,11 @@ public class Phase extends AbstractPlumberModel {
     }
 
     /**
-     * Get the archiveDirs, stashDirs, env and notifications for this phase, defaulting to the root versions if
+     * Get the archiveDirs, stashDirs, env, scm and notifications for this phase, defaulting to the root versions if
      * not specified here.
      *
      * @param root The Root this phase is in.
-     * @return A map of archiveDirs, stashDirs, env and notifications
+     * @return A map of archiveDirs, stashDirs, env, scm and notifications
      */
     public Map getOverrides(Root root) {
         def overrideMap = [:]
@@ -353,6 +379,18 @@ public class Phase extends AbstractPlumberModel {
             overrideMap.treatUnstableAsSuccess = root.treatUnstableAsSuccess
         } else {
             overrideMap.treatUnstableAsSuccess = this.treatUnstableAsSuccess
+        }
+
+        if (this.skipSCM == null) {
+            overrideMap.skipSCM = root.skipSCM
+        } else {
+            overrideMap.skipSCM = this.skipSCM
+        }
+
+        if (this.scms.isEmpty()) {
+            overrideMap.scms = ImmutableList.copyOf(root.scms)
+        } else {
+            overrideMap.scms = ImmutableList.copyOf(this.scms)
         }
 
         // Shortcut to avoid having to do collect in Pipeline script.

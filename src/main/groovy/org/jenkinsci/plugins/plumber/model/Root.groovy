@@ -40,6 +40,8 @@ public class Root extends AbstractPlumberModel {
     List<String> stashDirs = []
     Boolean treatUnstableAsSuccess = false
     Boolean debug = false
+    List<SCM> scms = []
+    Boolean skipSCM = false
 
     public Root() {
 
@@ -66,6 +68,11 @@ public class Root extends AbstractPlumberModel {
                     this.phases.add(new Phase(phaseMap))
                 }
             }
+            if (args.containsKey("scm") && args.scm instanceof List) {
+                args.scm?.each { Map<String,Object> scmMap ->
+                    this.scms.add(new SCM(scmMap))
+                }
+            }
             if (args.containsKey("notifications") && args.notifications instanceof Map) {
                 this.notifications = new Notifications((Map<String,Object>) args.notifications)
             }
@@ -80,11 +87,18 @@ public class Root extends AbstractPlumberModel {
             if (args.containsKey("debug")) {
                 this.debug = args.debug
             }
+            if (args.containsKey("skipSCM")) {
+                this.skipSCM = args.skipSCM
+            }
         }
     }
 
     Root phase(Closure<?> closure) {
         addClosureValToList("phases", Phase.class, closure)
+    }
+
+    Root scm(Closure<?> closure) {
+        addClosureValToList("scms", SCM.class, closure)
     }
 
     Root env(Map<String,String> val) {
@@ -127,9 +141,15 @@ public class Root extends AbstractPlumberModel {
         fieldVal("debug", val)
     }
 
+    Root skipSCM(Boolean val) {
+        fieldVal("skipSCM", val)
+    }
 
     public List<String> toPipelineScript(Boolean forExport = false) {
         def lines = []
+
+        lines << "import org.jenkinsci.plugins.pipelineaction.PipelineActionType"
+        lines << ""
 
         if (!forExport) {
             lines << "def call() {"

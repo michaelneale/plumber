@@ -33,8 +33,11 @@ import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
 import org.jenkinsci.plugins.plumber.model.Root
+import org.jenkinsci.plugins.plumber.model.SCM
 import org.jenkinsci.plugins.plumber.model.Unstash
 import org.jenkinsci.plugins.workflow.cps.CpsScript
+
+import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 
 class PlumberInterpreter implements Serializable {
     private CpsScript script;
@@ -119,8 +122,32 @@ class PlumberInterpreter implements Serializable {
                     generalNotifier(true, root.debug, overrides, phase)
 
                     debugLog(root.debug, "Checkout SCM")
-                    // TODO: Move to conditionals around SCM checkout
-                    script.checkout(script.scm)
+
+                    if (!overrides.skipSCM) {
+                        if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
+                            debugLog(root.debug, "SCM overrides specified")
+                            overrides.scms.each { SCM s ->
+                                def argMap = [:]
+                                argMap.putAll(s.config.getMap())
+
+                                argMap.put("name", s.scmName)
+                                if (s.directory != null) {
+                                    debugLog(root.debug, "Checking out with ${s.scmName} to directory ${s.directory}")
+                                    script.dir(s.directory) {
+                                        script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
+                                    }
+                                } else {
+                                    debugLog(root.debug, "Checking out with ${s.scmName} to root directory")
+                                    script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
+                                }
+                            }
+                        } else {
+                            debugLog(root.debug, "Default SCM behavior")
+                            script.checkout(script.scm)
+                        }
+                    } else {
+                        debugLog(root.debug, "SCM checkout skipped")
+                    }
 
                     if (!phase.unstash.isEmpty()) {
                         debugLog(root.debug, "Unstash configs found")
