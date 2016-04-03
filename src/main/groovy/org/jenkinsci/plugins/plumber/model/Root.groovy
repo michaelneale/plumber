@@ -148,7 +148,8 @@ public class Root extends AbstractPlumberModel {
     public List<String> toPipelineScript(Boolean forExport = false) {
         def lines = []
 
-        lines << "import org.jenkinsci.plugins.pipelineaction.PipelineActionType"
+        lines << "import io.jenkins.plugins.pipelineaction.PipelineActionType"
+        lines << "import org.jenkinsci.plugins.plumber.model.*"
         lines << ""
 
         if (!forExport) {

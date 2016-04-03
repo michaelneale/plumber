@@ -23,6 +23,8 @@
  */
 package org.jenkinsci.plugins.plumber;
 
+import hudson.model.Label;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -33,7 +35,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.test.BuildWatcher;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
+
+import static org.junit.Assert.assertTrue;
 
 public class PlumberStepDSLTest {
     @ClassRule
@@ -41,6 +46,7 @@ public class PlumberStepDSLTest {
     @Rule
     public RestartableJenkinsRule story = new RestartableJenkinsRule();
     @Rule public GitSampleRepoRule sampleRepo = new GitSampleRepoRule();
+    @Rule public GitSampleRepoRule otherRepo = new GitSampleRepoRule();
 
     @Test
     public void testSingleSimpleStep() throws Exception {
@@ -251,6 +257,109 @@ public class PlumberStepDSLTest {
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("Multiple phase", b);
                 story.j.assertLogContains("twoPhase", b);
+            }
+        });
+    }
+
+    @Test
+    public void testBasicCloneAndUpdate() throws Exception {
+        otherRepo.init();
+        otherRepo.write("README",
+                "THIS IS A README");
+        otherRepo.git("add", "README");
+        otherRepo.git("commit", "--message=files");
+
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                "plumber([\n"
+                        + "  debug: true,\n"
+                        + "  scm: [\n"
+                        + "    [\n"
+                        + "      name: 'git',\n"
+                        + "      config: [\n"
+                        + "        url: $/" + otherRepo + "/$,\n"
+                        + "        branch: '*/master'\n"
+                        + "      ]\n"
+                        + "    ]\n"
+                        + "  ],\n"
+                        + "  phases: [\n"
+                        + "    [\n"
+                        + "      name: 'pants',\n"
+                        + "      action: [\n"
+                        + "        name: 'catFile',\n"
+                        + "        file: 'README'\n"
+                        + "      ]\n"
+                        + "    ]\n"
+                        + "  ]\n"
+                        + "])\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("THIS IS A README",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+            }
+        });
+    }
+
+    @Test
+    public void testSCMPhaseOverride() throws Exception {
+        otherRepo.init();
+        otherRepo.write("README",
+                "SECOND REPO");
+        otherRepo.git("add", "README");
+        otherRepo.git("commit", "--message=files");
+
+        sampleRepo.init();
+        sampleRepo.write("README",
+                "FIRST REPO");
+        sampleRepo.git("add", "README");
+
+        sampleRepo.write("Jenkinsfile",
+                "plumber([\n"
+                        + "  debug: true,\n"
+                        + "  phases: [\n"
+                        + "    [\n"
+                        + "      name: 'first',\n"
+                        + "      action: [\n"
+                        + "        name: 'catFile',\n"
+                        + "        file: 'README'\n"
+                        + "      ]\n"
+                        + "    ],\n"
+                        + "    [\n"
+                        + "      name: 'second',\n"
+                        + "      action: [\n"
+                        + "        name: 'catFile',\n"
+                        + "        file: 'README'\n"
+                        + "      ],\n"
+                        + "      scm: [\n"
+                        + "        [\n"
+                        + "          name: 'git',\n"
+                        + "          config: [\n"
+                        + "            url: $/" + otherRepo + "/$,\n"
+                        + "            branch: '*/master'\n"
+                        + "          ]\n"
+                        + "        ]\n"
+                        + "      ],\n"
+                        + "      after: 'first',\n"
+                        + "    ]\n"
+                        + "  ]\n"
+                        + "])\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("FIRST REPO",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("SECOND REPO", b);
             }
         });
     }
