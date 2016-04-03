@@ -349,15 +349,15 @@ public class Phase extends AbstractPlumberModel {
         def overrideMap = [:]
 
         if (this.archiveDirs.isEmpty()) {
-            overrideMap.archiveDirs = ImmutableList.copyOf(root.archiveDirs)
+            overrideMap.archiveDirs = root.archiveDirs?.join(',')
         } else {
-            overrideMap.archiveDirs = ImmutableList.copyOf(this.archiveDirs)
+            overrideMap.archiveDirs = this.archiveDirs?.join(',')
         }
 
         if (this.stashDirs.isEmpty()) {
-            overrideMap.stashDirs = ImmutableList.copyOf(root.stashDirs)
+            overrideMap.stashDirs = root.stashDirs?.join(',')
         } else {
-            overrideMap.stashDirs = ImmutableList.copyOf(this.stashDirs)
+            overrideMap.stashDirs = this.stashDirs?.join(',')
         }
 
         overrideMap.env = [:]

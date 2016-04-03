@@ -363,4 +363,37 @@ public class PlumberStepDSLTest {
             }
         });
     }
+
+    @Test
+    public void testArchive() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                "plumber([\n"
+                        + "  debug: true,\n"
+                        + "  archiveDirs: ['outputDir/**'],"
+                        + "  phases: [\n"
+                        + "    [\n"
+                        + "      name: 'pants',\n"
+                        + "      action: [\n"
+                        + "        script: 'mkdir -p outputDir; echo \"onePhase\" > outputDir/outputFile'\n"
+                        + "      ]\n"
+                        + "    ]\n"
+                        + "  ]\n"
+                        + "])\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("outputDir",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                assertTrue(b.getArtifactManager().root().child("outputDir").isDirectory());
+                assertTrue(b.getArtifactManager().root().child("outputDir").child("outputFile").isFile());
+            }
+        });
+    }
+
 }
