@@ -180,7 +180,7 @@ class PlumberInterpreter implements Serializable {
 
                     if (!overrides.stashDirs.isEmpty()) {
                         debugLog(root.debug, "Stashing directories/files ${overrides.stashDirs}")
-                        script.stash(phase.name, overrides.stashDirs)
+                        script.stash(name: phase.name, includes: overrides.stashDirs)
                     }
 
                     // Post-phase notifier

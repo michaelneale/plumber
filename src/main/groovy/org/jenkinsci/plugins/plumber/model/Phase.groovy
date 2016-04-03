@@ -280,7 +280,7 @@ public class Phase extends AbstractPlumberModel {
             }
 
             if (!overrides.stashDirs.isEmpty()) {
-                lines << "stash ${toArgForm(name)}, [${toArgForm(overrides.stashDirs)}]"
+                lines << "stash name: ${toArgForm(name)}, includes: ${toArgForm(overrides.stashDirs)}"
             }
         }
         lines << "}"

@@ -396,4 +396,42 @@ public class PlumberStepDSLTest {
         });
     }
 
+    @Test
+    public void testStashUnstash() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                "plumber([\n"
+                        + "  debug: true,\n"
+                        + "  phases: [\n"
+                        + "    [\n"
+                        + "      name: 'pants',\n"
+                        + "      stashDirs: ['outputDir/**'],"
+                        + "      action: [\n"
+                        + "        script: 'mkdir -p outputDir; echo \"trousers\" > outputDir/outputFile'\n"
+                        + "      ]\n"
+                        + "    ],\n"
+                        + "    [\n"
+                        + "      name: 'shirts',\n"
+                        + "      unstash: 'pants',\n"
+                        + "      action: [\n"
+                        + "        script: 'cat outputDir/outputFile'\n"
+                        + "      ],\n"
+                        + "      after: 'pants',\n"
+                        + "    ]\n"
+                        + "  ]\n"
+                        + "])\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("outputDir",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("trousers", b);
+            }
+        });
+    }
 }
