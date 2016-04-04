@@ -178,13 +178,21 @@ class PlumberInterpreter implements Serializable {
 
                     // Archiving and stashing.
                     if (!overrides.archiveDirs.isEmpty()) {
-                        debugLog(root.debug, "Archiving directories/files ${overrides.archiveDirs}")
-                        script.archive(overrides.archiveDirs)
+                        try {
+                            debugLog(root.debug, "Archiving directories/files ${overrides.archiveDirs}")
+                            script.archive(overrides.archiveDirs)
+                        } catch (Exception e) {
+                            script.echo("Error archiving ${overrides.archiveDirs}, but continuing: ${e}")
+                        }
                     }
 
                     if (!overrides.stashDirs.isEmpty()) {
                         debugLog(root.debug, "Stashing directories/files ${overrides.stashDirs}")
-                        script.stash(name: phase.name, includes: overrides.stashDirs)
+                        try {
+                            script.stash(name: phase.name, includes: overrides.stashDirs)
+                        } catch (Exception e) {
+                            script.echo("Error stashing ${overrides.stashDirs}, but continuing: ${e}")
+                        }
                     }
 
                     // Post-phase notifier

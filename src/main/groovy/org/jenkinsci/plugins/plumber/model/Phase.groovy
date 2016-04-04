@@ -280,11 +280,19 @@ public class Phase extends AbstractPlumberModel {
         if (actionClass != null && actionClass.usesNode()) {
             // Archiving and stashing.
             if (!overrides.archiveDirs.isEmpty()) {
-                lines << "archive ${toArgForm(overrides.archiveDirs)}"
+                lines << "try {"
+                lines << "\tarchive ${toArgForm(overrides.archiveDirs)}"
+                lines << "} catch (Exception e) {"
+                lines << "\techo('Error archiving ${overrides.archiveDirs}, but continuing: \${e}')\n"
+                lines << "}"
             }
 
             if (!overrides.stashDirs.isEmpty()) {
-                lines << "stash name: ${toArgForm(name)}, includes: ${toArgForm(overrides.stashDirs)}"
+                lines << "try {"
+                lines << "\tstash name: ${toArgForm(name)}, includes: ${toArgForm(overrides.stashDirs)}"
+                lines << "} catch (Exception e) {"
+                lines << "\techo('Error stashing ${overrides.stashDirs}, but continuing: \${e}')\n"
+                lines << "}"
             }
         }
         lines << "}"
