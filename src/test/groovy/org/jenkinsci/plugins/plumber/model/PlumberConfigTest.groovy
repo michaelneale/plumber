@@ -95,8 +95,8 @@ class PlumberConfigTest {
 
         def overrides = phase.getOverrides(root)
 
-        assertEquals(["third/dir"], overrides.archiveDirs)
-        assertEquals(["stash/one", "stash/two"], overrides.stashDirs)
+        assertEquals("third/dir", overrides.archiveDirs)
+        assertEquals("stash/one,stash/two", overrides.stashDirs)
         assertEquals("banana", overrides.env?.foo)
         assertEquals("trousers", overrides.env?.pants)
         assertEquals("far", overrides.env?.boo)
@@ -179,8 +179,8 @@ class PlumberConfigTest {
 
         def overrides = phase.getOverrides(root)
 
-        assertEquals(["third/dir"], overrides.archiveDirs)
-        assertEquals(["stash/one", "stash/two"], overrides.stashDirs)
+        assertEquals("third/dir", overrides.archiveDirs)
+        assertEquals("stash/one,stash/two", overrides.stashDirs)
         assertEquals("banana", overrides.env?.foo)
         assertEquals("trousers", overrides.env?.pants)
         assertEquals("far", overrides.env?.boo)

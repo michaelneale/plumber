@@ -62,10 +62,17 @@ public class Unstash extends AbstractPlumberModel {
 
         def lines = []
 
-        // Just realized we don't actually have a directory parameter to unstash yet. I feel silly.
-        // Keeping the class and such as is for the moment anyway.
-        // TODO: Either add output directory support to unstash or get rid of this pointless class!
-        lines << "unstash ${toArgForm(fromPhase)}"
+        def unstashDir
+        if (dir == null || dir == "") {
+            unstashDir = "pwd()"
+        } else {
+            unstashDir = "'${dir}'"
+        }
+
+        lines << "unstash {\n"
+        lines << "\tfromPhase ${toArgForm(fromPhase)}\n"
+        lines << "\tdir ${unstashDir}\n"
+        lines << "}\n"
         return lines.collect { "${tabs}${it}" }
     }
 

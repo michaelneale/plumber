@@ -97,9 +97,15 @@ public class Phase extends AbstractPlumberModel {
                     this.scms.add(new SCM(scmMap))
                 }
             }
-            if (args.containsKey("unstash") && args.unstash instanceof List) {
-                args.unstash?.each { Map<String,Object> unstashMap ->
-                    this.unstash.add(new Unstash(unstashMap))
+            if (args.containsKey("unstash")) {
+                if (args.unstash instanceof List) {
+                    args.unstash?.each { Map<String, Object> unstashMap ->
+                        this.unstash.add(new Unstash(unstashMap))
+                    }
+                } else if (args.unstash instanceof Map) {
+                    this.unstash.add(new Unstash((Map<String,Object>)args.unstash))
+                } else if (args.unstash instanceof String) {
+                    this.unstash.add(new Unstash([fromPhase: args.unstash]))
                 }
             }
             if (args.containsKey("notifications") && args.notifications instanceof Map) {

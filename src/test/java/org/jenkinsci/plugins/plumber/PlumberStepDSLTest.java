@@ -407,7 +407,7 @@ public class PlumberStepDSLTest {
                         + "      name: 'pants',\n"
                         + "      stashDirs: ['outputDir/**'],"
                         + "      action: [\n"
-                        + "        script: 'mkdir -p outputDir; echo \"trousers\" > outputDir/outputFile'\n"
+                        + "        script: 'mkdir -p outputDir; export FOO=\"trousers\"; echo \"PANTS\\${FOO}\" > outputDir/outputFile'\n"
                         + "      ]\n"
                         + "    ],\n"
                         + "    [\n"
@@ -430,8 +430,50 @@ public class PlumberStepDSLTest {
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 story.j.assertLogContains("outputDir",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-                story.j.assertLogContains("trousers", b);
+                story.j.assertLogContains("PANTStrousers", b);
             }
         });
     }
+
+    @Test
+    public void testStashUnstashToDirectory() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                "plumber([\n"
+                        + "  debug: true,\n"
+                        + "  phases: [\n"
+                        + "    [\n"
+                        + "      name: 'pants',\n"
+                        + "      stashDirs: ['outputDir/**'],"
+                        + "      action: [\n"
+                        + "        script: 'mkdir -p outputDir; export FOO=\"trousers\"; echo \"PANTS\\${FOO}\" > outputDir/outputFile'\n"
+                        + "      ]\n"
+                        + "    ],\n"
+                        + "    [\n"
+                        + "      name: 'shirts',\n"
+                        + "      unstash: [\n"
+                        + "        fromPhase: 'pants', dir: 'someDir'\n"
+                        + "      ],\n"
+                        + "      action: [\n"
+                        + "        script: 'cat someDir/outputDir/outputFile'\n"
+                        + "      ],\n"
+                        + "      after: 'pants',\n"
+                        + "    ]\n"
+                        + "  ]\n"
+                        + "])\n");
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("outputDir",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("PANTStrousers", b);
+            }
+        });
+    }
+
 }

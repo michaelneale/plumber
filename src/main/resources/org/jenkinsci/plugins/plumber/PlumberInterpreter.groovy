@@ -158,7 +158,13 @@ class PlumberInterpreter implements Serializable {
                         for (int i = 0; i < phase.unstash.size(); i++) {
                             Unstash s = phase.unstash.get(i)
                             debugLog(root.debug, "Unstashing from phase ${s.fromPhase}")
-                            script.unstash(s.fromPhase)
+                            def unstashDir = s.dir
+                            if (unstashDir == null) {
+                                unstashDir = script.pwd()
+                            }
+                            script.dir(unstashDir) {
+                                script.unstash(s.fromPhase)
+                            }
                         }
                     }
 
