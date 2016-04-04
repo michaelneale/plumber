@@ -127,18 +127,22 @@ class PlumberInterpreter implements Serializable {
                         if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
                             debugLog(root.debug, "SCM overrides specified")
                             overrides.scms.each { SCM s ->
-                                def argMap = [:]
-                                argMap.putAll(s.config.getMap())
+                                if (overrides.scms.size() > 1 && (s.directory == null || s.directory == "")) {
+                                    script.error("More than one SCM specified, and SCM specified without a directory, so failing.")
+                                } else {
+                                    def argMap = [:]
+                                    argMap.putAll(s.config.getMap())
 
-                                argMap.put("name", s.scmName)
-                                if (s.directory != null) {
-                                    debugLog(root.debug, "Checking out with ${s.scmName} to directory ${s.directory}")
-                                    script.dir(s.directory) {
+                                    argMap.put("name", s.scmName)
+                                    if (s.directory != null) {
+                                        debugLog(root.debug, "Checking out with ${s.scmName} to directory ${s.directory}")
+                                        script.dir(s.directory) {
+                                            script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
+                                        }
+                                    } else {
+                                        debugLog(root.debug, "Checking out with ${s.scmName} to root directory")
                                         script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
                                     }
-                                } else {
-                                    debugLog(root.debug, "Checking out with ${s.scmName} to root directory")
-                                    script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
                                 }
                             }
                         } else {

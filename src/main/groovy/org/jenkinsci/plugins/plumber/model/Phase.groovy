@@ -258,7 +258,11 @@ public class Phase extends AbstractPlumberModel {
             if (!overrides.skipSCM) {
                 if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
                     overrides.scms.each { SCM s ->
-                        lines.addAll(s.toPipelineScript(this, 0))
+                        if (overrides.scms.size() > 1 && (s.directory == null || s.directory == "")) {
+                            lines << "error('More than one SCM specified, and SCM specified without a directory, so failing.')"
+                        } else {
+                            lines.addAll(s.toPipelineScript(this, 0))
+                        }
                     }
                 } else {
                     lines << "checkout scm"
