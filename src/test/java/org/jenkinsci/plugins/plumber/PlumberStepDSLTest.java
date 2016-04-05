@@ -23,8 +23,7 @@
  */
 package org.jenkinsci.plugins.plumber;
 
-import hudson.model.Label;
-import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -35,8 +34,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.test.BuildWatcher;
-import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
+
+import java.io.IOException;
+import java.net.URL;
 
 import static org.junit.Assert.assertTrue;
 
@@ -52,15 +53,7 @@ public class PlumberStepDSLTest {
     public void testSingleSimpleStep() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber \"\"\"\n"
-                        + "  debug true\n"
-                        + "  phase {\n"
-                        + "    name 'pants'\n"
-                        + "    action {\n"
-                        + "      script 'echo hello'\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "\"\"\"\n");
+                pipelineSourceFromResources("singleSimpleStep"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -81,22 +74,7 @@ public class PlumberStepDSLTest {
     public void testTwoLinearSteps() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber \"\"\"\n"
-                        + "  debug true\n"
-                        + "  phase {\n"
-                        + "    name 'pants'\n"
-                        + "    action {\n"
-                        + "      script 'echo hello'\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "  phase {\n"
-                        + "    name 'trousers'\n"
-                        + "    action {\n"
-                        + "      script 'echo goodbye'\n"
-                        + "    }\n"
-                        + "    after 'pants'\n"
-                        + "  }\n"
-                        + "\"\"\"\n");
+                pipelineSourceFromResources("twoLinearSteps"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -119,21 +97,7 @@ public class PlumberStepDSLTest {
     public void testTwoParallelSteps() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber \"\"\"\n"
-                        + "  debug true\n"
-                        + "  phase {\n"
-                        + "    name 'pants'\n"
-                        + "    action {\n"
-                        + "      script 'echo onePhase'\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "  phase {\n"
-                        + "    name 'trousers'\n"
-                        + "    action {\n"
-                        + "      script 'echo twoPhase'\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "\"\"\"\n");
+                pipelineSourceFromResources("twoParallelSteps"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -154,21 +118,7 @@ public class PlumberStepDSLTest {
     public void testCodeGen() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber(\"\"\"\n"
-                        + "  debug true\n"
-                        + "  phase {\n"
-                        + "    name 'pants'\n"
-                        + "    action {\n"
-                        + "      script 'echo onePhase'\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "  phase {\n"
-                        + "    name 'trousers'\n"
-                        + "    action {\n"
-                        + "      script 'echo twoPhase'\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "\"\"\", true)\n");
+                pipelineSourceFromResources("codeGen"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -189,25 +139,7 @@ public class PlumberStepDSLTest {
     public void testArgsAsClosureFromNonCPS() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "@NonCPS\n"
-                        + "def plumberConf() {\n"
-                        + "  return {\n"
-                        + "    debug true\n"
-                        + "    phase {\n"
-                        + "      name 'pants'\n"
-                        + "      action {\n"
-                        + "        script 'echo onePhase'\n"
-                        + "      }\n"
-                        + "    }\n"
-                        + "    phase {\n"
-                        + "      name 'trousers'\n"
-                        + "      action {\n"
-                        + "        script 'echo twoPhase'\n"
-                        + "      }\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "}\n\n"
-                        + "plumber(plumberConf(), false)\n");
+                pipelineSourceFromResources("argsAsClosureFromNonCPS"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -228,23 +160,7 @@ public class PlumberStepDSLTest {
     public void testArgsAsMap() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber([\n"
-                        + "  debug: true,\n"
-                        + "  phases: [\n"
-                        + "    [\n"
-                        + "      name: 'pants',\n"
-                        + "      action: [\n"
-                        + "        script: 'echo onePhase'\n"
-                        + "      ]\n"
-                        + "    ]\n,"
-                        + "    [\n"
-                        + "      name: 'trousers',\n"
-                        + "      action: [\n"
-                        + "        script: 'echo twoPhase'\n"
-                        + "      ]\n"
-                        + "    ]\n"
-                        + "  ]\n"
-                        + "])\n");
+                pipelineSourceFromResources("argsAsMap"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -368,18 +284,7 @@ public class PlumberStepDSLTest {
     public void testArchive() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber([\n"
-                        + "  debug: true,\n"
-                        + "  archiveDirs: ['outputDir/**'],"
-                        + "  phases: [\n"
-                        + "    [\n"
-                        + "      name: 'pants',\n"
-                        + "      action: [\n"
-                        + "        script: 'mkdir -p outputDir; echo \"onePhase\" > outputDir/outputFile'\n"
-                        + "      ]\n"
-                        + "    ]\n"
-                        + "  ]\n"
-                        + "])\n");
+                pipelineSourceFromResources("archive"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -400,26 +305,7 @@ public class PlumberStepDSLTest {
     public void testStashUnstash() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber([\n"
-                        + "  debug: true,\n"
-                        + "  phases: [\n"
-                        + "    [\n"
-                        + "      name: 'pants',\n"
-                        + "      stashDirs: ['outputDir/**'],"
-                        + "      action: [\n"
-                        + "        script: 'mkdir -p outputDir; export FOO=\"trousers\"; echo \"PANTS\\${FOO}\" > outputDir/outputFile'\n"
-                        + "      ]\n"
-                        + "    ],\n"
-                        + "    [\n"
-                        + "      name: 'shirts',\n"
-                        + "      unstash: 'pants',\n"
-                        + "      action: [\n"
-                        + "        script: 'cat outputDir/outputFile'\n"
-                        + "      ],\n"
-                        + "      after: 'pants',\n"
-                        + "    ]\n"
-                        + "  ]\n"
-                        + "])\n");
+                pipelineSourceFromResources("stashUnstash"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -439,28 +325,7 @@ public class PlumberStepDSLTest {
     public void testStashUnstashToDirectory() throws Exception {
         sampleRepo.init();
         sampleRepo.write("Jenkinsfile",
-                "plumber([\n"
-                        + "  debug: true,\n"
-                        + "  phases: [\n"
-                        + "    [\n"
-                        + "      name: 'pants',\n"
-                        + "      stashDirs: ['outputDir/**'],"
-                        + "      action: [\n"
-                        + "        script: 'mkdir -p outputDir; export FOO=\"trousers\"; echo \"PANTS\\${FOO}\" > outputDir/outputFile'\n"
-                        + "      ]\n"
-                        + "    ],\n"
-                        + "    [\n"
-                        + "      name: 'shirts',\n"
-                        + "      unstash: [\n"
-                        + "        fromPhase: 'pants', dir: 'someDir'\n"
-                        + "      ],\n"
-                        + "      action: [\n"
-                        + "        script: 'cat someDir/outputDir/outputFile'\n"
-                        + "      ],\n"
-                        + "      after: 'pants',\n"
-                        + "    ]\n"
-                        + "  ]\n"
-                        + "])\n");
+                pipelineSourceFromResources("stashUnstashToDirectory"));
 
         sampleRepo.git("add", "Jenkinsfile");
         sampleRepo.git("commit", "--message=files");
@@ -476,4 +341,14 @@ public class PlumberStepDSLTest {
         });
     }
 
+    private String pipelineSourceFromResources(String pipelineName) throws IOException {
+        String pipelineSource = null;
+
+        URL url = getClass().getResource("/" + pipelineName + ".groovy");
+        if (url != null) {
+            pipelineSource = IOUtils.toString(url);
+        }
+
+        return pipelineSource;
+    }
 }
