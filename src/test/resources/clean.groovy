@@ -25,22 +25,29 @@ plumber([
     debug: true,
     phases: [
         [
-            name: "pants",
-            stashDirs: ["outputDir/**"],
+            name: "first-phase",
             action: [
-                script: 'mkdir -p outputDir; export FOO="trousers"; echo "PANTS${FOO}" > outputDir/outputFile'
+                script: "echo 'foo' > foo"
             ]
         ],
         [
-            name: 'shirts',
-            unstash: 'pants',
+            name: "second-phase",
+            action: [
+                // The generated file should still exist at this point.
+                script: "test -f foo"
+            ],
+            after: "first-phase"
+        ],
+        [
+            name: "third-phase",
             clean: true,
             action: [
-                script: 'cat outputDir/outputFile'
+                // Now the generated file should not exist.
+                script: "test ! -f foo"
             ],
-            after: 'pants'
+            after: "second-phase"
         ]
+
     ]
 ])
-
 

@@ -305,6 +305,10 @@ class PlumberInterpreter implements Serializable {
             return {
                 debugLog(debug, "Running in label ${phase.label}")
                 script.node(phase.label) {
+                    if (phase.clean) {
+                        debugLog(debug, "Cleaning workspace before phase execution")
+                        script.deleteDir()
+                    }
                     body.call()
                 }
             }
@@ -321,6 +325,10 @@ class PlumberInterpreter implements Serializable {
             return {
                 debugLog(debug, "Running on arbitrary node")
                 script.node {
+                    if (phase.clean) {
+                        debugLog(debug, "Cleaning workspace before phase execution")
+                        script.deleteDir()
+                    }
                     body.call()
                 }
             }

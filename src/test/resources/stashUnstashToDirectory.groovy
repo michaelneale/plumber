@@ -33,6 +33,7 @@ plumber([
         ],
         [
             name: 'shirts',
+            clean: true,
             unstash: [
                 fromPhase: 'pants', dir: 'someDir'
             ],

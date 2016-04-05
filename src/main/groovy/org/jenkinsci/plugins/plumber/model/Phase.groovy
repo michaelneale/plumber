@@ -51,6 +51,8 @@ public class Phase extends AbstractPlumberModel {
     Matrix matrix
     List<SCM> scms = []
     Boolean skipSCM
+    // TODO: Decide whether to default to clean workspaces. Currently *not*.
+    Boolean clean
 
     public Phase() {
 
@@ -124,6 +126,9 @@ public class Phase extends AbstractPlumberModel {
             }
             if (args.containsKey("skipSCM")) {
                 this.skipSCM = args.skipSCM
+            }
+            if (args.containsKey("clean")) {
+                this.clean = args.clean
             }
         }
     }
@@ -222,6 +227,10 @@ public class Phase extends AbstractPlumberModel {
 
     Phase skipSCM(Boolean val) {
         fieldVal("skipSCM", val)
+    }
+
+    Phase clean(Boolean val) {
+        fieldVal("clean", val)
     }
 
     public void addToEnv(String key, Object value) {
@@ -339,6 +348,9 @@ public class Phase extends AbstractPlumberModel {
             lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 0))
         } else if (label != null) {
             lines << "node('${label}') {"
+            if (clean) {
+                lines << "\tdeleteDir()"
+            }
             lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 1))
             lines << "}"
         } else if (dockerImage != null) {
@@ -349,6 +361,9 @@ public class Phase extends AbstractPlumberModel {
             lines << "}"
         } else {
             lines << "node {"
+            if (clean) {
+                lines << "\tdeleteDir()"
+            }
             lines.addAll(envWrapper(overridesFlagsString, notifierFlagsBase, overrides, 1))
             lines << "}"
         }
