@@ -38,7 +38,7 @@ public class Action extends MappedClosure {
 
         if (getMap() != null && !getMap().isEmpty()) {
             // If we don't have a name we're assuming it's a script.
-            lines << "runPipelineAction([${toArgForm(getMap())}])"
+            lines << "runPipelineAction(PipelineActionType.STANDARD, [${toArgForm(getMap())}])"
         }
 
         return lines.collect { "${tabs}${it}" }

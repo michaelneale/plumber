@@ -37,8 +37,6 @@ import org.jenkinsci.plugins.plumber.model.SCM
 import org.jenkinsci.plugins.plumber.model.Unstash
 import org.jenkinsci.plugins.workflow.cps.CpsScript
 
-import static org.jenkinsci.plugins.plumber.Utils.toArgForm
-
 class PlumberInterpreter implements Serializable {
     private CpsScript script;
 
@@ -175,7 +173,7 @@ class PlumberInterpreter implements Serializable {
                         if (actionMap != null && !actionMap.isEmpty()) {
                             // TODO: Write the actual step!
                             debugLog(root.debug, "Running action ${actionMap.name ?: 'script'}")
-                            script.getProperty("runPipelineAction").call(actionMap)
+                            script.getProperty("runPipelineAction").call(PipelineActionType.STANDARD, actionMap)
                         } else {
                             debugLog(root.debug, "ERROR: No action specified")
                             script.error("No action specified")
