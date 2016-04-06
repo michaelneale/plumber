@@ -50,6 +50,7 @@ public class Phase extends AbstractPlumberModel {
     Boolean treatUnstableAsSuccess
     Matrix matrix
     List<SCM> scms = []
+    List<Reporter> reporters = []
     Boolean skipSCM
     // TODO: Decide whether to default to clean workspaces. Currently *not*.
     Boolean clean
@@ -97,6 +98,11 @@ public class Phase extends AbstractPlumberModel {
             if (args.containsKey("scm") && args.scm instanceof List) {
                 args.scm?.each { Map<String,Object> scmMap ->
                     this.scms.add(new SCM(scmMap))
+                }
+            }
+            if (args.containsKey("reporters") && args.reporters instanceof List) {
+                args.reporters?.each { Map<String,Object> reporterMap ->
+                    this.reporters.add(new Reporter(reporterMap))
                 }
             }
             if (args.containsKey("unstash")) {
@@ -217,6 +223,10 @@ public class Phase extends AbstractPlumberModel {
         addClosureValToList("scms", SCM.class, closure)
     }
 
+    Phase reporter(Closure<?> closure) {
+        addClosureValToList("reporters", Reporter.class, closure)
+    }
+
     Phase env(Map<String,String> val) {
         fieldVal("env", val)
     }
@@ -308,6 +318,16 @@ public class Phase extends AbstractPlumberModel {
                 lines << "} catch (Exception e) {"
                 lines << "\techo('Error stashing ${overrides.stashDirs}, but continuing: \${e}')\n"
                 lines << "}"
+            }
+            if (!reporters.isEmpty()) {
+                reporters.each { r ->
+                    lines << "try {"
+                    lines.addAll(r.toPipelineScript(this, 1))
+                    lines << "} catch (Exception e) {"
+                    lines << '\techo("Error running reporter ' + r.reporterName + ' with config ' +
+                        r.config.getMap() + ', but continuing: ${e}"'
+                    lines << '}'
+                }
             }
         }
         lines << "}"

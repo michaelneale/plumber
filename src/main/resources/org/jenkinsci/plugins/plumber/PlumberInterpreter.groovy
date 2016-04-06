@@ -199,6 +199,18 @@ class PlumberInterpreter implements Serializable {
                         }
                     }
 
+                    if (!phase.reporters.isEmpty()) {
+                        debugLog(root.debug, "Running configured reporters")
+                        phase.reporters.each { r ->
+                            try {
+                                debugLog(root.debug, "Running reporter ${r.reporterName}")
+                                script.getProperty("runPipelineAction").call(PipelineActionType.REPORTER, r.config.getMap())
+                            } catch (Exception e) {
+                                script.echo("Error running reporter ${r.reporterName} with config ${r.config.getMap()}, but continuing: ${e}")
+                            }
+                        }
+                    }
+
                     // Post-phase notifier
                     debugLog(root.debug, "Post-phase notifier")
                     generalNotifier(false, root.debug, overrides, phase)

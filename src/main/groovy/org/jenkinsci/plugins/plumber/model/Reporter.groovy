@@ -26,28 +26,26 @@ package org.jenkinsci.plugins.plumber.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import io.jenkins.plugins.pipelineaction.PipelineActionType
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 
+
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
-public class SCM extends AbstractPlumberModel {
-    String scmName
+public class Reporter extends AbstractPlumberModel {
+    String reporterName
     MappedClosure config
-    String directory
 
-    public SCM() {
+    public Reporter() {
 
     }
 
-    public SCM(Map<String,Object> args) {
+    public Reporter(Map<String,Object> args) {
         if (args != null) {
-            this.scmName = args.name
-            if (args.containsKey("dir") && args.dir != null) {
-                this.directory = args.dir
-            }
+            this.reporterName = args.name
             if (args.containsKey("config") && args.config instanceof Map) {
                 this.config = new MappedClosure((Map<String, Object>) args.config)
             }
@@ -55,15 +53,11 @@ public class SCM extends AbstractPlumberModel {
         }
     }
 
-    SCM name(String val) {
-        fieldVal("scmName", val)
+    Reporter name(String val) {
+        fieldVal("reporterName", val)
     }
 
-    SCM dir(String val) {
-        fieldVal("directory", val)
-    }
-
-    SCM config(Closure<?> closure) {
+    Reporter config(Closure<?> closure) {
         closureVal("config", MappedClosure.class, closure)
     }
 
@@ -76,16 +70,8 @@ public class SCM extends AbstractPlumberModel {
             def argMap = [:]
             argMap.putAll(config.getMap())
 
-            argMap.put("name", scmName)
-            def indent = ""
-            if (directory != null) {
-                lines << "dir('${directory}') {"
-                indent = "\t"
-            }
-            lines << "${indent}runPipelineAction(PipelineActionType.SCM, [${toArgForm(argMap)}])"
-            if (directory != null) {
-                lines << "}"
-            }
+            argMap.put("name", reporterName)
+            lines << "runPipelineAction(PipelineActionType.REPORTER, [${toArgForm(argMap)}])"
         }
 
         return lines.collect { "${tabs}${it}" }
