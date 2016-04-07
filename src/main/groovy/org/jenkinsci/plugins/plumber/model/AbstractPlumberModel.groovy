@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.plumber.model
 
 import groovy.transform.AutoClone
 import groovy.transform.AutoCloneStyle
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import java.lang.reflect.ParameterizedType
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
@@ -38,6 +39,7 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.
 
+    @Whitelisted
     public AbstractPlumberModel() {
     }
 

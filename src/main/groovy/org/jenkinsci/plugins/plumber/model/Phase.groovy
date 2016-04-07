@@ -28,6 +28,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.jenkins.plugins.pipelineaction.PipelineAction
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
@@ -36,23 +37,56 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Phase extends AbstractPlumberModel {
+    @Whitelisted
     String name
+
+    @Whitelisted
     List<String> before = []
+
+    @Whitelisted
     List<String> after = []
+
+    @Whitelisted
     Action action
+
+    @Whitelisted
     String label
+
+    @Whitelisted
     String dockerImage
+
+    @Whitelisted
     List<String> archiveDirs = []
+
+    @Whitelisted
     List<String> stashDirs = []
+
+    @Whitelisted
     List<Unstash> unstash = []
+
+    @Whitelisted
     Notifications notifications
+
+    @Whitelisted
     Map<String,String> env = [:]
+
+    @Whitelisted
     Boolean treatUnstableAsSuccess
+
+    @Whitelisted
     Matrix matrix
+
+    @Whitelisted
     List<SCM> scms = []
+
+    @Whitelisted
     List<Reporter> reporters = []
+
+    @Whitelisted
     Boolean skipSCM
+
     // TODO: Decide whether to default to clean workspaces. Currently *not*.
+    @Whitelisted
     Boolean clean
 
     public Phase() {
@@ -139,106 +173,132 @@ public class Phase extends AbstractPlumberModel {
         }
     }
 
+    @Whitelisted
     Phase name(String val) {
         fieldVal("name", val)
     }
 
+    @Whitelisted
     Phase label(String val) {
         fieldVal("label", val)
     }
 
+    @Whitelisted
     Phase dockerImage(String val) {
         fieldVal("dockerImage", val)
     }
 
+    @Whitelisted
     Phase before(String val) {
         addValToList("before", val)
     }
 
+    @Whitelisted
     Phase before(List<String> val) {
         fieldVal("before", val)
     }
 
+    @Whitelisted
     Phase before(String... val) {
         fieldVal("before", val)
     }
 
+    @Whitelisted
     Phase after(String val) {
         addValToList("after", val)
     }
 
+    @Whitelisted
     Phase after(List<String> val) {
         fieldVal("after", val)
     }
 
+    @Whitelisted
     Phase after(String... val) {
         fieldVal("after", val)
     }
 
+    @Whitelisted
     Phase archiveDir(String val) {
         addValToList("archiveDirs", val)
     }
 
+    @Whitelisted
     Phase archiveDirs(List<String> val) {
         fieldVal("archiveDirs", val)
     }
 
+    @Whitelisted
     Phase archiveDirs(String... val) {
         fieldVal("archiveDirs", val)
     }
 
+    @Whitelisted
     Phase stashDir(String val) {
         addValToList("stashDirs", val)
     }
 
+    @Whitelisted
     Phase stashDirs(List<String> val) {
         fieldVal("stashDirs", val)
     }
 
+    @Whitelisted
     Phase stashDirs(String... val) {
         fieldVal("stashDirs", val)
     }
 
+    @Whitelisted
     Phase action(Closure<?> closure) {
         closureVal("action", Action.class, closure)
     }
 
+    @Whitelisted
     Phase matrix(Closure<?> closure) {
         closureVal("matrix", Matrix.class, closure)
     }
 
+    @Whitelisted
     Phase notifications(Closure<?> closure) {
         closureVal("notifications", Notifications.class, closure)
     }
 
+    @Whitelisted
     Phase unstash(Closure<?> closure) {
         addClosureValToList("unstash", Unstash.class, closure)
     }
 
+    @Whitelisted
     Phase unstash(String from, String dir) {
         addValToList("unstash", new Unstash().fromPhase(from).dir(dir))
     }
 
+    @Whitelisted
     Phase scm(Closure<?> closure) {
         addClosureValToList("scms", SCM.class, closure)
     }
 
+    @Whitelisted
     Phase reporter(Closure<?> closure) {
         addClosureValToList("reporters", Reporter.class, closure)
     }
 
+    @Whitelisted
     Phase env(Map<String,String> val) {
         fieldVal("env", val)
     }
 
+    @Whitelisted
     Phase treatUnstableAsSuccess(Boolean val) {
         fieldVal("treatUnstableAsSuccess", val)
     }
 
+    @Whitelisted
     Phase skipSCM(Boolean val) {
         fieldVal("skipSCM", val)
     }
 
+    @Whitelisted
     Phase clean(Boolean val) {
         fieldVal("clean", val)
     }
@@ -398,6 +458,7 @@ public class Phase extends AbstractPlumberModel {
      * @param root The Root this phase is in.
      * @return A map of archiveDirs, stashDirs, env, scm and notifications
      */
+    @Whitelisted
     public Map getOverrides(Root root) {
         def overrideMap = [:]
 
@@ -441,9 +502,11 @@ public class Phase extends AbstractPlumberModel {
         }
 
         if (this.scms.isEmpty()) {
-            overrideMap.scms = ImmutableList.copyOf(root.scms)
+            overrideMap.scms = []
+            overrideMap.scms.addAll(root.scms)
         } else {
-            overrideMap.scms = ImmutableList.copyOf(this.scms)
+            overrideMap.scms = []
+            overrideMap.scms.addAll(this.scms)
         }
 
         // Shortcut to avoid having to do collect in Pipeline script.

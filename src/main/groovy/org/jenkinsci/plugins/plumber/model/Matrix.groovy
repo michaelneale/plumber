@@ -26,11 +26,13 @@ package org.jenkinsci.plugins.plumber.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Matrix extends AbstractPlumberModel {
+    @Whitelisted
     MappedClosure axes
 
     public Matrix() {
@@ -47,6 +49,7 @@ public class Matrix extends AbstractPlumberModel {
 
     // NOTE: Going with 'matrix { axes { FOO ["a", "b", "c"] } }' syntax so that we don't get screwed when we eventually
     // need to support other configuration options on Matrix.
+    @Whitelisted
     Matrix axes(Closure<?> closure) {
         closureVal("axes", MappedClosure.class, closure)
     }
@@ -56,6 +59,7 @@ public class Matrix extends AbstractPlumberModel {
      *
      * @return a list of maps, with env var name as key and value of the env var as value
      */
+    @Whitelisted
     public List<Map<String,Object>> matrixCombinations() {
         def combos = []
 

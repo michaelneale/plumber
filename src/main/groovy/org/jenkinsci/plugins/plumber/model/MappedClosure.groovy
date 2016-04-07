@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.plumber.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 
 /**
@@ -65,6 +66,7 @@ class MappedClosure implements Serializable {
         this
     }
 
+    @Whitelisted
     public Map<String, Object> getMap() {
         def mapCopy = [:]
         mapCopy.putAll(delegate)

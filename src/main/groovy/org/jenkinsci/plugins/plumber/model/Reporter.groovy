@@ -27,6 +27,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import io.jenkins.plugins.pipelineaction.PipelineActionType
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
@@ -36,7 +37,10 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Reporter extends AbstractPlumberModel {
+    @Whitelisted
     String reporterName
+
+    @Whitelisted
     MappedClosure config
 
     public Reporter() {
@@ -53,10 +57,12 @@ public class Reporter extends AbstractPlumberModel {
         }
     }
 
+    @Whitelisted
     Reporter name(String val) {
         fieldVal("reporterName", val)
     }
 
+    @Whitelisted
     Reporter config(Closure<?> closure) {
         closureVal("config", MappedClosure.class, closure)
     }

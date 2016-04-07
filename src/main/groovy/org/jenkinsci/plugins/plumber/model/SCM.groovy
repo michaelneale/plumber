@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.plumber.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
@@ -34,8 +35,13 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class SCM extends AbstractPlumberModel {
+    @Whitelisted
     String scmName
+
+    @Whitelisted
     MappedClosure config
+
+    @Whitelisted
     String directory
 
     public SCM() {
@@ -55,14 +61,17 @@ public class SCM extends AbstractPlumberModel {
         }
     }
 
+    @Whitelisted
     SCM name(String val) {
         fieldVal("scmName", val)
     }
 
+    @Whitelisted
     SCM dir(String val) {
         fieldVal("directory", val)
     }
 
+    @Whitelisted
     SCM config(Closure<?> closure) {
         closureVal("config", MappedClosure.class, closure)
     }

@@ -51,17 +51,19 @@ public class PlumberStepDSL extends GlobalVariable {
     }
 
     @Extension
-    public static class MiscWhitelist extends ProxyWhitelist {
-        public MiscWhitelist() throws IOException {
-            // TODO: Don't do this. Figure out whitelisting better.
-            super(new BlanketWhitelist(), new StaticWhitelist(
+    public static class PlumberWhiteList extends ProxyWhitelist {
+        public PlumberWhiteList() throws IOException {
+            super(new StaticWhitelist(
                     "method java.util.Map$Entry getKey",
                     "method java.util.Map$Entry getValue",
-                    "new org.jenkinsci.plugins.plumber.model.PlumberConfig",
-                    "method org.jenkinsci.plugins.plumber.model.PlumberConfig fromClosure groovy.lang.Closure",
-                    "method org.jenkinsci.plugins.plumber.model.Root debug java.lang.Boolean",
                     "staticField java.lang.System err",
-                    "method java.io.PrintStream println java.lang.String"
+                    "method java.io.PrintStream println java.lang.String",
+                    "method java.util.Map containsKey java.lang.Object",
+                    "method java.util.Map isEmpty",
+                    "staticField hudson.model.Result UNSTABLE",
+                    "staticField hudson.model.Result FAILURE",
+                    "method java.util.Map putAll java.util.Map",
+                    "staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareGreaterThan java.lang.Object java.lang.Object"
             ));
         }
     }

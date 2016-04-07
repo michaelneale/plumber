@@ -124,7 +124,8 @@ class PlumberInterpreter implements Serializable {
                     if (!overrides.skipSCM) {
                         if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
                             debugLog(root.debug, "SCM overrides specified")
-                            overrides.scms.each { SCM s ->
+                            for (int i = 0; i < overrides.scms.size(); i++) {
+                                SCM s = overrides.scms.get(i)
                                 if (overrides.scms.size() > 1 && (s.directory == null || s.directory == "")) {
                                     script.error("More than one SCM specified, and SCM specified without a directory, so failing.")
                                 } else {
@@ -181,7 +182,7 @@ class PlumberInterpreter implements Serializable {
                     }
 
                     // Archiving and stashing.
-                    if (!overrides.archiveDirs.isEmpty()) {
+                    if (overrides.archiveDirs != null && overrides.archiveDirs != "") {
                         try {
                             debugLog(root.debug, "Archiving directories/files ${overrides.archiveDirs}")
                             script.archive(overrides.archiveDirs)
@@ -190,7 +191,7 @@ class PlumberInterpreter implements Serializable {
                         }
                     }
 
-                    if (!overrides.stashDirs.isEmpty()) {
+                    if (overrides.stashDirs != null && overrides.stashDirs != "") {
                         debugLog(root.debug, "Stashing directories/files ${overrides.stashDirs}")
                         try {
                             script.stash(name: phase.name, includes: overrides.stashDirs)
@@ -223,8 +224,6 @@ class PlumberInterpreter implements Serializable {
     private Closure generalNotifier(Boolean before, Boolean debug, Map overrides, Phase phase) {
         Notifications n = overrides.notifications
 
-        def notifySteps = []
-
         def shouldSend = false
         def actualAction = getActualAction(phase.action)
 
@@ -241,7 +240,7 @@ class PlumberInterpreter implements Serializable {
                 failureResult = Result.UNSTABLE
             }
 
-            def currentResult = script.$build().getResult()
+            def currentResult = script.getProperty("currentBuild").getResult()
 
             if (currentResult == null || currentResult.isBetterThan(failureResult)) {
                 if (n.onSuccess) {

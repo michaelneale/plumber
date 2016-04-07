@@ -27,6 +27,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
 import static org.jenkinsci.plugins.plumber.Utils.toArgForm
@@ -35,7 +36,10 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Unstash extends AbstractPlumberModel {
+    @Whitelisted
     String fromPhase
+
+    @Whitelisted
     String dir
 
     public Unstash() {
@@ -49,10 +53,12 @@ public class Unstash extends AbstractPlumberModel {
         }
     }
 
+    @Whitelisted
     Unstash fromPhase(String val) {
         fieldVal("fromPhase", val)
     }
 
+    @Whitelisted
     Unstash dir(String val) {
         fieldVal("dir", val)
     }

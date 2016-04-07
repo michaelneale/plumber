@@ -26,17 +26,29 @@ package org.jenkinsci.plugins.plumber.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Notifications extends AbstractPlumberModel {
 
+    @Whitelisted
     Map<String,MappedClosure> configs = [:]
+
+    @Whitelisted
     Boolean allPhases = true
+
+    @Whitelisted
     Boolean skipThisPhase = false
+
+    @Whitelisted
     Boolean onSuccess = false
+
+    @Whitelisted
     Boolean onFailure = true
+
+    @Whitelisted
     Boolean beforePhase = false
 
     public Notifications() {
@@ -67,26 +79,32 @@ public class Notifications extends AbstractPlumberModel {
         }
     }
 
+    @Whitelisted
     Notifications config(String type, Closure<?> closure) {
         addClosureValToMap("configs", MappedClosure.class, type, closure)
     }
 
+    @Whitelisted
     Notifications allPhases(Boolean val) {
         fieldVal("allPhases", val)
     }
 
+    @Whitelisted
     Notifications skipThisPhase(Boolean val) {
         fieldVal("skipThisPhase", val)
     }
 
+    @Whitelisted
     Notifications onSuccess(Boolean val) {
         fieldVal("onSuccess", val)
     }
 
+    @Whitelisted
     Notifications onFailure(Boolean val) {
         fieldVal("onFailure", val)
     }
 
+    @Whitelisted
     Notifications beforePhase(Boolean val) {
         fieldVal("beforePhase", val)
     }
@@ -111,7 +129,7 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t\t\tfailureResult = Result.UNSTABLE"
         lines << "\t\t}"
 
-        lines << "\t\tdef currentResult = currentBuild.rawBuild.getResult()"
+        lines << "\t\tdef currentResult = currentBuild.getResult()"
         lines << "\t\tif (currentResult == null || currentResult.isBetterThan(failureResult)) {"
         lines << "\t\t\tif (flags.onSuccess) {"
         lines << "\t\t\t\tshouldSend = true"
@@ -127,7 +145,7 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t\tdef theseNotifiers = getNotifiers(phase.name, before, n.configs)"
         lines << "\t\tfor (int i = 0; i < theseNotifiers.size(); i++) {"
         lines << "\t\t\tdef thisNotifier = theseNotifiers.get(i)"
-        lines << "\t\t\tscript.getProperty('runPipelineAction').call(PipelineActionType.NOTIFIER, thisNotifier)"
+        lines << "\t\t\trunPipelineAction(PipelineActionType.NOTIFIER, thisNotifier)"
         lines << "\t\t}"
         lines << "\t}"
         lines << "}"

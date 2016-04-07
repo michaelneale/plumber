@@ -27,20 +27,38 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.jenkinsci.plugins.plumber.PlumberDependencyGraph
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Root extends AbstractPlumberModel {
 
+    @Whitelisted
     List<Phase> phases = []
+
+    @Whitelisted
     Map<String,String> env = [:]
+
+    @Whitelisted
     Notifications notifications
+
+    @Whitelisted
     List<String> archiveDirs = []
+
+    @Whitelisted
     List<String> stashDirs = []
+
+    @Whitelisted
     Boolean treatUnstableAsSuccess = false
+
+    @Whitelisted
     Boolean debug = false
+
+    @Whitelisted
     List<SCM> scms = []
+
+    @Whitelisted
     Boolean skipSCM = false
 
     public Root() {
@@ -93,58 +111,72 @@ public class Root extends AbstractPlumberModel {
         }
     }
 
+    @Whitelisted
     Root phase(Closure<?> closure) {
         addClosureValToList("phases", Phase.class, closure)
     }
 
+    @Whitelisted
     Root scm(Closure<?> closure) {
         addClosureValToList("scms", SCM.class, closure)
     }
 
+    @Whitelisted
     Root env(Map<String,String> val) {
         fieldVal("env", val)
     }
 
+    @Whitelisted
     Root notifications(Closure<?> closure) {
         closureVal("notifications", Notifications.class, closure)
     }
 
+    @Whitelisted
     Root archiveDir(String val) {
         addValToList("archiveDirs", val)
     }
 
+    @Whitelisted
     Root archiveDirs(List<String> val) {
         fieldVal("archiveDirs", val)
     }
 
+    @Whitelisted
     Root archiveDirs(String... val) {
         fieldVal("archiveDirs", val)
     }
 
+    @Whitelisted
     Root stashDir(String val) {
         addValToList("stashDirs", val)
     }
 
+    @Whitelisted
     Root stashDirs(List<String> val) {
         fieldVal("stashDirs", val)
     }
 
+    @Whitelisted
     Root stashDirs(String... val) {
         fieldVal("stashDirs", val)
     }
 
+    @Whitelisted
     Root treatUnstableAsSuccess(Boolean val) {
         fieldVal("treatUnstableAsSuccess", val)
     }
 
+    @Whitelisted
     Root debug(Boolean val) {
         fieldVal("debug", val)
     }
 
+    @Whitelisted
     Root skipSCM(Boolean val) {
         fieldVal("skipSCM", val)
     }
 
+    @Whitelisted
     public List<String> toPipelineScript(Boolean forExport = false) {
         def lines = []
 
@@ -208,6 +240,7 @@ public class Root extends AbstractPlumberModel {
      *
      * @return A list of maps with "stageName" and "phases" keys.
      */
+    @Whitelisted
     public List executionSets() {
         def graph = PlumberDependencyGraph.fromPhaseList(phases)
 
