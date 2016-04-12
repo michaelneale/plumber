@@ -25,15 +25,9 @@ package org.jenkinsci.plugins.pipelinedsl;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyCodeSource;
-import hudson.Extension;
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.cps.CpsThread;
 import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
-
-import java.io.*;
-import java.net.URL;
 
 public abstract class PipelineDSLHelper extends GlobalVariable {
 
@@ -57,22 +51,21 @@ public abstract class PipelineDSLHelper extends GlobalVariable {
         ClassLoader cl = getClass().getClassLoader();
 
         String scriptPath = "dsl/" + getFunctionName() + ".groovy";
-        Reader r = new InputStreamReader(cl.getResourceAsStream(scriptPath), "UTF-8");
-
-        GroovyCodeSource gsc = new GroovyCodeSource(r, getFunctionName() + ".groovy", cl.getResource(scriptPath).getFile());
-        gsc.setCachable(true);
-
-
-        Object pipelineDSL = c.getExecution()
-                .getShell()
-                .getClassLoader()
-                .parseClass(gsc)
-                .newInstance();
-        binding.setVariable(getName(), pipelineDSL);
-        r.close();
+        try {
+            GroovyCodeSource gsc = new GroovyCodeSource(cl.getResource(scriptPath));
+            gsc.setCachable(true);
 
 
-        return pipelineDSL;
+            Object pipelineDSL = c.getExecution()
+                    .getShell()
+                    .getClassLoader()
+                    .parseClass(gsc)
+                    .newInstance();
+            binding.setVariable(getName(), pipelineDSL);
+
+            return pipelineDSL;
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Script " + scriptPath + " did not resolve to a URL, failing.");
+        }
     }
-
 }
