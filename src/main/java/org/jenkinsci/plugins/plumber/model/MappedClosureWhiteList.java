@@ -33,7 +33,9 @@ import java.lang.reflect.Method;
 public class MappedClosureWhiteList extends Whitelist {
     @Override
     public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
-        if (method.getName().equals("invokeMethod") && MappedClosure.class.isAssignableFrom(receiver.getClass())) {
+        if (method.getName().equals("invokeMethod") && MethodMissingWrapper.class.isAssignableFrom(receiver.getClass())) {
+            return true;
+        } else if (method.getName().equals("getProperty") && MethodMissingWrapper.class.isAssignableFrom(receiver.getClass())) {
             return true;
         } else {
             return false;

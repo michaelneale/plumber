@@ -35,7 +35,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
-class MappedClosure implements Serializable {
+class MappedClosure implements Serializable, MethodMissingWrapper {
     @Delegate Map<String,Object> delegate = [:]
 
     public MappedClosure() {

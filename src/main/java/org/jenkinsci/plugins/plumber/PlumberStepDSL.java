@@ -41,6 +41,8 @@ public class PlumberStepDSL extends GlobalVariable {
 
     @Override
     public Object getValue(CpsScript script) throws Exception {
+
+        script.getClass().getClassLoader().loadClass("org.jenkinsci.plugins.plumber.ClosureTranslatorMap");
         return script.getClass()
                 .getClassLoader()
                 .loadClass("org.jenkinsci.plugins.plumber.PlumberInterpreter")
@@ -62,8 +64,13 @@ public class PlumberStepDSL extends GlobalVariable {
                     "staticField hudson.model.Result UNSTABLE",
                     "staticField hudson.model.Result FAILURE",
                     "method java.util.Map putAll java.util.Map",
-                    "staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareGreaterThan java.lang.Object java.lang.Object"
-            ));
+                    "staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareGreaterThan java.lang.Object java.lang.Object",
+
+                    // Code calling this stuff may need to be moved into Utils.
+                    "method java.lang.Class getDeclaredFields",
+                    "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods leftShift java.util.Collection java.lang.Object",
+                    "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.lang.Object[]",
+                    "field java.lang.reflect.Field name"));
         }
     }
 

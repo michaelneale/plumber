@@ -24,6 +24,11 @@
 package org.jenkinsci.plugins.plumber
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.jenkinsci.plugins.plumber.model.AbstractPlumberModel
+import org.jenkinsci.plugins.plumber.model.MappedClosure
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
+
+import java.lang.reflect.ParameterizedType
 
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Utils {
@@ -89,4 +94,54 @@ public class Utils {
         "\t" * tabDepth
     }
 
+    @Whitelisted
+    public static boolean isFieldA(Class targetClass, Class actualClass, String fieldName) {
+        def actualFieldName = actualFieldName(actualClass, fieldName)
+        def fieldType = actualClass.metaClass.getMetaProperty(actualFieldName)?.type
+
+        if (fieldType == null) {
+            return false
+        } else {
+            return fieldType == targetClass || targetClass.isAssignableFrom(fieldType)
+        }
+    }
+
+    @Whitelisted
+    public static String actualFieldName(Class actualClass, String fieldName) {
+        if (actualClass.metaClass.getMetaProperty(fieldName) != null) {
+            return fieldName
+        } else if (actualClass.metaClass.getMetaProperty("${fieldName}s") != null) {
+            return "${fieldName}s"
+        } else {
+            return null
+        }
+    }
+
+    @Whitelisted
+    public static Class actualFieldType(Class actualClass, String fieldName) {
+        def actualFieldName = actualFieldName(actualClass, fieldName)
+        def field = actualClass.getDeclaredFields().find { !it.isSynthetic() && it.name == actualFieldName }
+        // If the field's a ParameterizedType, we need to check it to see if it's containing a Plumber class.
+        if (field.getGenericType() instanceof ParameterizedType) {
+            if (Map.class.isAssignableFrom(field.getType())) {
+                return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1]
+            } else {
+                // First class listed in the actual type arguments - we ignore anything past this because eh.
+                return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]
+            }
+        } else {
+            return field.getType()
+        }
+
+    }
+
+    @Whitelisted
+    public static boolean instanceOfWrapper(Class c, Object o) {
+        return c.isInstance(o)
+    }
+
+    @Whitelisted
+    public static boolean assignableFromWrapper(Class c, Class o) {
+        return c.isAssignableFrom(o)
+    }
 }

@@ -24,17 +24,20 @@
 package org.jenkinsci.plugins.plumber
 
 import com.cloudbees.groovy.cps.NonCPS
+import com.cloudbees.groovy.cps.impl.CpsClosure
 import hudson.model.Result
 import io.jenkins.plugins.pipelineaction.PipelineAction
 import io.jenkins.plugins.pipelineaction.PipelineActionType
 import org.jenkinsci.plugins.plumber.model.Action
 import org.jenkinsci.plugins.plumber.model.MappedClosure
+import org.jenkinsci.plugins.plumber.model.MethodMissingWrapper
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
 import org.jenkinsci.plugins.plumber.model.Root
 import org.jenkinsci.plugins.plumber.model.SCM
 import org.jenkinsci.plugins.plumber.model.Unstash
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 import org.jenkinsci.plugins.workflow.cps.CpsScript
 
 class PlumberInterpreter implements Serializable {
@@ -42,6 +45,17 @@ class PlumberInterpreter implements Serializable {
 
     public PlumberInterpreter(CpsScript script) {
         this.script = script;
+    }
+
+    def call(CpsClosure closure, Boolean doCodeGen = false) {
+        ClosureTranslatorMap m = new ClosureTranslatorMap(Root.class)
+
+        closure.delegate = m
+        closure.resolveStrategy = Closure.DELEGATE_ONLY
+        closure.call()
+
+        Root root = getRootConfig(m.getMap())
+        executePipeline(root, doCodeGen)
     }
 
     def call(String closureString, Boolean doCodeGen = false) {
@@ -395,4 +409,6 @@ class PlumberInterpreter implements Serializable {
 
         return notifiers
     }
+
+
 }
