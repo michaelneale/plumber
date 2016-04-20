@@ -28,11 +28,11 @@ import org.jenkinsci.plugins.plumber.model.MappedClosure
 import org.jenkinsci.plugins.plumber.model.MethodMissingWrapper
 import org.jenkinsci.plugins.plumber.model.ModelForm
 
-public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable {
+public class ClosureModelTranslator implements MethodMissingWrapper, Serializable {
     Map<String,Object> actualMap = [:]
     Class<ModelForm> actualClass
 
-    ClosureTranslatorMap(Class clazz) {
+    ClosureModelTranslator(Class clazz) {
         actualClass = clazz
     }
 
@@ -70,7 +70,7 @@ public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable 
                     Closure argClosure = argValue
                     def actualType = Utils.actualFieldType(actualClass, methodName)
 
-                    def ctm = new ClosureTranslatorMap(actualType)
+                    def ctm = new ClosureModelTranslator(actualType)
 
                     argClosure.delegate = ctm
                     argClosure.resolveStrategy = Closure.DELEGATE_ONLY

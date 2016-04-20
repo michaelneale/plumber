@@ -46,7 +46,7 @@ class PlumberInterpreter implements Serializable {
     }
 
     def call(CpsClosure closure, Boolean doCodeGen = false) {
-        ClosureTranslatorMap m = new ClosureTranslatorMap(Root.class)
+        ClosureModelTranslator m = new ClosureModelTranslator(Root.class)
 
         closure.delegate = m
         closure.resolveStrategy = Closure.DELEGATE_ONLY
