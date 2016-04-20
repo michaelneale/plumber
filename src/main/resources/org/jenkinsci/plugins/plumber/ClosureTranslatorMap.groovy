@@ -30,10 +30,6 @@ public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable 
     Map<String,Object> actualMap = [:]
     Class actualClass
 
-    ClosureTranslatorMap(String clazz) {
-        actualClass = Class.forName("org.jenkinsci.plugins.plumber.model.${clazz}")
-    }
-
     ClosureTranslatorMap(Class clazz) {
         actualClass = clazz
     }
@@ -60,6 +56,7 @@ public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable 
             def resultValue
             def actualFieldName = Utils.actualFieldName(actualClass, methodName)
             if (actualFieldName != null) {
+                // If the argument is a Closure, then we need to recurse to get the value.
                 if (argValue != null && Utils.instanceOfWrapper(Closure.class, argValue)) {
                     Closure argClosure = argValue
                     def actualType = Utils.actualFieldType(actualClass, methodName)

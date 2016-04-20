@@ -94,18 +94,35 @@ public class Utils {
         "\t" * tabDepth
     }
 
+    /**
+     * Workaround for not having to whitelist isAssignableFrom, metaClass etc to determine whether a field on
+     * a class is of a specific type.
+     *
+     * @param fieldType The type we're checking
+     * @param actualClass The class we're inspecting
+     * @param fieldName The name of the field - could be a singular when the field name is plural, in which case
+     *   we'll get the actual name from actualFieldName(...)
+     * @return True if the field exists and is of the given type.
+     */
     @Whitelisted
-    public static boolean isFieldA(Class targetClass, Class actualClass, String fieldName) {
+    public static boolean isFieldA(Class fieldType, Class actualClass, String fieldName) {
         def actualFieldName = actualFieldName(actualClass, fieldName)
-        def fieldType = actualClass.metaClass.getMetaProperty(actualFieldName)?.type
+        def realFieldType = actualClass.metaClass.getMetaProperty(actualFieldName)?.type
 
-        if (fieldType == null) {
+        if (realFieldType == null) {
             return false
         } else {
-            return fieldType == targetClass || targetClass.isAssignableFrom(fieldType)
+            return realFieldType == fieldType || fieldType.isAssignableFrom(realFieldType)
         }
     }
 
+    /**
+     * Gets the actual field name for a possibly-needs-to-be-pluralized name.
+     *
+     * @param actualClass The class we're inspecting
+     * @param fieldName The original field name, which could need to be pluralized.
+     * @return The real field name, pluralized if necessary, or null if not found.
+     */
     @Whitelisted
     public static String actualFieldName(Class actualClass, String fieldName) {
         if (actualClass.metaClass.getMetaProperty(fieldName) != null) {
@@ -117,29 +134,54 @@ public class Utils {
         }
     }
 
+    /**
+     * Get the actual field type or contained field type in the case of parameterized types in the inspected class.
+     *
+     * @param actualClass The class we're inspecting
+     * @param fieldName The field name we're looking for, which could get pluralized.
+     * @return The class of the field in the inspected class, or the class contained in the list or map.
+     */
     @Whitelisted
     public static Class actualFieldType(Class actualClass, String fieldName) {
         def actualFieldName = actualFieldName(actualClass, fieldName)
-        def field = actualClass.getDeclaredFields().find { !it.isSynthetic() && it.name == actualFieldName }
-        // If the field's a ParameterizedType, we need to check it to see if it's containing a Plumber class.
-        if (field.getGenericType() instanceof ParameterizedType) {
-            if (Map.class.isAssignableFrom(field.getType())) {
-                return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1]
-            } else {
-                // First class listed in the actual type arguments - we ignore anything past this because eh.
-                return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]
-            }
+        if (actualFieldName == null) {
+            return null
         } else {
-            return field.getType()
+            def field = actualClass.getDeclaredFields().find { !it.isSynthetic() && it.name == actualFieldName }
+            // If the field's a ParameterizedType, we need to check it to see if it's containing a Plumber class.
+            if (field.getGenericType() instanceof ParameterizedType) {
+                if (Map.class.isAssignableFrom(field.getType())) {
+                    return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1]
+                } else {
+                    // First class listed in the actual type arguments - we ignore anything past this because eh.
+                    return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]
+                }
+            } else {
+                return field.getType()
+            }
         }
 
     }
 
+    /**
+     * Simple wrapper for isInstance to avoid whitelisting issues.
+     *
+     * @param c The class to check against
+     * @param o The object to check
+     * @return True if the object is an instance of the class, false otherwise
+     */
     @Whitelisted
     public static boolean instanceOfWrapper(Class c, Object o) {
         return c.isInstance(o)
     }
 
+    /**
+     * Simple wrapper for isAssignableFrom to avoid whitelisting issues.
+     *
+     * @param c The class that should be assignable from
+     * @param o The class to check
+     * @return True if o can be assigned to c, false otherwise
+     */
     @Whitelisted
     public static boolean assignableFromWrapper(Class c, Class o) {
         return c.isAssignableFrom(o)
