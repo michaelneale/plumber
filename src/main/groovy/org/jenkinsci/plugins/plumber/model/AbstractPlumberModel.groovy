@@ -35,7 +35,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
  */
 @AutoClone(style = AutoCloneStyle.SERIALIZATION)
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
-public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> implements Serializable {
+public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> implements Serializable, ModelForm {
 
     // TODO: Add some generalized validation hook here with implementations in the subclasses.
 
@@ -208,6 +208,13 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
         }
 
         return tree
+    }
+
+    @Whitelisted
+    public void modelFromMap(Map<String,Object> m) {
+        m.each { k, v ->
+            this."${k}"(v)
+        }
     }
 
 }

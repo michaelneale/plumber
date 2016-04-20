@@ -23,49 +23,10 @@
  */
 package org.jenkinsci.plugins.plumber.model
 
-import groovy.json.JsonOutput
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
-@SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
-public class PlumberConfig {
-    private Root root
 
+interface ModelForm {
     @Whitelisted
-    public PlumberConfig() {
-        // Empty constructor basically just for whitelisting.
-    }
-
-    @Whitelisted
-    public PlumberConfig(Root root) {
-        this.root = root
-    }
-
-    @Whitelisted
-    public void fromString(String str) {
-        fromClosure((Closure)new GroovyShell().evaluate(str))
-    }
-
-    @Whitelisted
-    public void fromClosure(Closure<?> closure) {
-        root = new Root()
-        closure.delegate = root
-        closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.call()
-    }
-
-    @Whitelisted
-    public void fromMap(Map<String,Object> map) {
-        root = new Root(map)
-    }
-
-    @Whitelisted
-    public Root getConfig() {
-        return root
-    }
-
-    public String toJson() {
-        return JsonOutput.prettyPrint(JsonOutput.toJson(root))
-    }
-
+    public void modelFromMap(Map<String,Object> m)
 }

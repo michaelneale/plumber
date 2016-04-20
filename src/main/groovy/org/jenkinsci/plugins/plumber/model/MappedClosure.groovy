@@ -35,13 +35,14 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
-class MappedClosure implements Serializable, MethodMissingWrapper {
+class MappedClosure implements Serializable, MethodMissingWrapper, ModelForm {
     @Delegate Map<String,Object> delegate = [:]
 
     public MappedClosure() {
 
     }
 
+    @Whitelisted
     public MappedClosure(Map<String,Object> inMap) {
         this.delegate.putAll(inMap)
     }
@@ -64,6 +65,11 @@ class MappedClosure implements Serializable, MethodMissingWrapper {
         // TODO: Probably error out if we get an empty args?
         
         this
+    }
+
+    @Whitelisted
+    public void modelFromMap(Map<String,Object> inMap) {
+        this.delegate.putAll(inMap)
     }
 
     @Whitelisted

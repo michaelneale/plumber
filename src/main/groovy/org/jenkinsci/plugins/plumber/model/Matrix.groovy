@@ -54,6 +54,11 @@ public class Matrix extends AbstractPlumberModel {
         closureVal("axes", MappedClosure.class, closure)
     }
 
+    @Whitelisted
+    Matrix axes(MappedClosure mappedClosure) {
+        fieldVal("axes", mappedClosure)
+    }
+
     /**
      * Gets a list of maps for each possible combination of the matrix.
      *

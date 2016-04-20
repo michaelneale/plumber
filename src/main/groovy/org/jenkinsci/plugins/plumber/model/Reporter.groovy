@@ -67,6 +67,11 @@ public class Reporter extends AbstractPlumberModel {
         closureVal("config", MappedClosure.class, closure)
     }
 
+    @Whitelisted
+    Reporter config(MappedClosure m) {
+        fieldVal("config", m)
+    }
+
     public List<String> toPipelineScript(Phase parent, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 

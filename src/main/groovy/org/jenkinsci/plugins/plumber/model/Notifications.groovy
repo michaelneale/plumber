@@ -34,7 +34,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 public class Notifications extends AbstractPlumberModel {
 
     @Whitelisted
-    Map<String,MappedClosure> configs = [:]
+    List<MappedClosure> configs = []
 
     @Whitelisted
     Boolean allPhases = true
@@ -74,14 +74,24 @@ public class Notifications extends AbstractPlumberModel {
             }
 
             args.configs?.each { String name, Map<String,Object> conf ->
-                this.configs."${name}" = new MappedClosure(conf)
+                this.configs.add(new MappedClosure(conf))
             }
         }
     }
 
     @Whitelisted
     Notifications config(String type, Closure<?> closure) {
-        addClosureValToMap("configs", MappedClosure.class, type, closure)
+        addClosureValToList("configs", MappedClosure.class, type, closure)
+    }
+
+    @Whitelisted
+    Notifications config(MappedClosure mappedClosure) {
+        addValToList("configs", mappedClosure)
+    }
+
+    @Whitelisted
+    Notifications configs(List<MappedClosure> mappedClosures) {
+        fieldVal("configs", mappedClosures)
     }
 
     @Whitelisted
@@ -150,12 +160,11 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t}"
         lines << "}"
         lines << "@NonCPS"
-        lines << "private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, Map<String,MappedClosure> configs) {"
+        lines << "private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, List<MappedClosure> configs) {"
         lines << "\tdef notifiers = []"
-        lines << "\tconfigs.each { k, v ->"
+        lines << "\tconfigs.each { v ->"
         lines << "\t\tdef conf = v?.getMap()"
         lines << "\t\tif (conf != null) {"
-        lines << "\t\t\tconf.name = k"
         lines << "\t\t\tconf.phaseName = phaseName"
         lines << "\t\t\tconf.before = before"
         lines << "\t\t\tnotifiers << conf"

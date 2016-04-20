@@ -254,8 +254,18 @@ public class Phase extends AbstractPlumberModel {
     }
 
     @Whitelisted
+    Phase action(Action a) {
+        fieldVal("action", a)
+    }
+
+    @Whitelisted
     Phase matrix(Closure<?> closure) {
         closureVal("matrix", Matrix.class, closure)
+    }
+
+    @Whitelisted
+    Phase matrix(Matrix m) {
+        fieldVal("matrix", m)
     }
 
     @Whitelisted
@@ -264,8 +274,23 @@ public class Phase extends AbstractPlumberModel {
     }
 
     @Whitelisted
+    Phase notifications(Notifications n) {
+        fieldVal("notifications", n)
+    }
+
+    @Whitelisted
     Phase unstash(Closure<?> closure) {
         addClosureValToList("unstash", Unstash.class, closure)
+    }
+
+    @Whitelisted
+    Phase unstash(Unstash u) {
+        addValToList("unstash", u)
+    }
+
+    @Whitelisted
+    Phase unstash(List<Unstash> u) {
+        fieldVal("unstash", u)
     }
 
     @Whitelisted
@@ -279,8 +304,28 @@ public class Phase extends AbstractPlumberModel {
     }
 
     @Whitelisted
+    Phase scm(SCM s) {
+        addValToList("scms", s)
+    }
+
+    @Whitelisted
+    Phase scms(List<SCM> s) {
+        fieldVal("scms", s)
+    }
+
+    @Whitelisted
     Phase reporter(Closure<?> closure) {
         addClosureValToList("reporters", Reporter.class, closure)
+    }
+
+    @Whitelisted
+    Phase reporter(Reporter r) {
+        addValToList("reporters", r)
+    }
+
+    @Whitelisted
+    Phase reporters(List<Reporter> r) {
+        fieldVal("reporters", r)
     }
 
     @Whitelisted

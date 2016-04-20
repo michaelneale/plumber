@@ -117,8 +117,28 @@ public class Root extends AbstractPlumberModel {
     }
 
     @Whitelisted
+    Root phase(Phase p) {
+        addValToList("phases", p)
+    }
+
+    @Whitelisted
+    Root phases(List<Phase> p) {
+        fieldVal("phases", p)
+    }
+
+    @Whitelisted
     Root scm(Closure<?> closure) {
         addClosureValToList("scms", SCM.class, closure)
+    }
+
+    @Whitelisted
+    Root scm(SCM s) {
+        addValToList("scms", s)
+    }
+
+    @Whitelisted
+    Root scms(List<SCM> s) {
+        fieldVal("scms", s)
     }
 
     @Whitelisted
@@ -129,6 +149,11 @@ public class Root extends AbstractPlumberModel {
     @Whitelisted
     Root notifications(Closure<?> closure) {
         closureVal("notifications", Notifications.class, closure)
+    }
+
+    @Whitelisted
+    Root notifications(Notifications n) {
+        fieldVal("notifications", n)
     }
 
     @Whitelisted

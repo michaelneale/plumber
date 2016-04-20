@@ -23,15 +23,23 @@
  */
 package org.jenkinsci.plugins.plumber
 
+import org.jenkinsci.plugins.plumber.model.AbstractPlumberModel
 import org.jenkinsci.plugins.plumber.model.MappedClosure
 import org.jenkinsci.plugins.plumber.model.MethodMissingWrapper
+import org.jenkinsci.plugins.plumber.model.ModelForm
 
 public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable {
     Map<String,Object> actualMap = [:]
-    Class actualClass
+    Class<ModelForm> actualClass
 
     ClosureTranslatorMap(Class clazz) {
         actualClass = clazz
+    }
+
+    ModelForm getModelForm() {
+        ModelForm m = Utils.newInstanceWrapper(actualClass)
+        m.modelFromMap(actualMap)
+        return m
     }
 
     /**
@@ -50,6 +58,7 @@ public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable 
             argValue = args[0]
         }
 
+        // If we're already in a MappedClosure, we're fine.
         if (Utils.assignableFromWrapper(MappedClosure.class, actualClass) && argValue != null) {
             actualMap[methodName] = argValue
         } else {
@@ -67,7 +76,13 @@ public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable 
                     argClosure.resolveStrategy = Closure.DELEGATE_ONLY
                     argClosure.call()
 
-                    resultValue = ctm.getMap()
+                    if (Utils.assignableFromWrapper(AbstractPlumberModel.class, actualType)
+                        || Utils.assignableFromWrapper(MappedClosure.class, actualType)) {
+                        resultValue = ctm.getModelForm()
+                    } else {
+                        // error!
+                        System.err.println("Got a closure translating to type ${actualType} which is not handled")
+                    }
                 } else {
                     resultValue = argValue
                 }
@@ -81,7 +96,6 @@ public class ClosureTranslatorMap implements MethodMissingWrapper, Serializable 
                 } else {
                     actualMap[actualFieldName] = resultValue
                 }
-                // TODO: Probably error out if we get an empty args?
             }
         }
         this

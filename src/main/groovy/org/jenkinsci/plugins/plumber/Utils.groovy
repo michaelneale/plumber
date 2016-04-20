@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.plumber
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import org.jenkinsci.plugins.plumber.model.AbstractPlumberModel
 import org.jenkinsci.plugins.plumber.model.MappedClosure
+import org.jenkinsci.plugins.plumber.model.ModelForm
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import java.lang.reflect.ParameterizedType
@@ -185,5 +186,10 @@ public class Utils {
     @Whitelisted
     public static boolean assignableFromWrapper(Class c, Class o) {
         return c.isAssignableFrom(o)
+    }
+
+    @Whitelisted
+    public static ModelForm newInstanceWrapper(Class<ModelForm> c) {
+        return c.newInstance()
     }
 }

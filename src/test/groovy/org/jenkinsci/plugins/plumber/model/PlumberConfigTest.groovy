@@ -144,7 +144,9 @@ class PlumberConfigTest {
                 stashDirs: ["stash/one", "stash/two"],
 
                 notifications: [
-                        configs:[ email: [
+                        configs:[
+                            [
+
                                 to: "some@one.com"
                         ]],
                         onSuccess: true

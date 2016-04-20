@@ -54,7 +54,7 @@ class PlumberInterpreter implements Serializable {
         closure.resolveStrategy = Closure.DELEGATE_ONLY
         closure.call()
 
-        Root root = getRootConfig(m.getMap())
+        Root root = m.getModelForm()
         executePipeline(root, doCodeGen)
     }
 
@@ -395,12 +395,11 @@ class PlumberInterpreter implements Serializable {
     }
 
     @NonCPS
-    private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, Map<String,MappedClosure> configs) {
+    private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, List<MappedClosure> configs) {
         def notifiers = []
-        configs.each { k, v ->
+        configs.each { v ->
             def conf = v?.getMap()
             if (conf != null) {
-                conf.name = k
                 conf.phaseName = phaseName
                 conf.before = before
                 notifiers << conf
