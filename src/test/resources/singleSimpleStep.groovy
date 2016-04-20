@@ -22,16 +22,14 @@
  * THE SOFTWARE.
  */
 
-plumber([
-    debug: true,
-    phases: [
-        [
-            name: 'pants',
-            action: [
-                script: 'echo hello'
-            ]
-        ]
-    ]
-])
+plumber {
+    debug true
+    phase {
+        name 'pants'
+        action {
+            script 'echo hello'
+        }
+    }
+}
 
 

@@ -55,33 +55,9 @@ public class Notifications extends AbstractPlumberModel {
 
     }
 
-    public Notifications(Map<String,Object> args) {
-        if (args != null) {
-            if (args.containsKey("allPhases")) {
-                this.allPhases = args.allPhases
-            }
-            if (args.containsKey("skipThisPhase")) {
-                this.skipThisPhase = args.skipThisPhase
-            }
-            if (args.containsKey("onSuccess")) {
-                this.onSuccess = args.onSuccess
-            }
-            if (args.containsKey("onFailure")) {
-                this.onFailure = args.onFailure
-            }
-            if (args.containsKey("beforePhase")) {
-                this.beforePhase = args.beforePhase
-            }
-
-            args.configs?.each { String name, Map<String,Object> conf ->
-                this.configs.add(new MappedClosure(conf))
-            }
-        }
-    }
-
     @Whitelisted
-    Notifications config(String type, Closure<?> closure) {
-        addClosureValToList("configs", MappedClosure.class, type, closure)
+    Notifications config(Closure<?> closure) {
+        addClosureValToList("configs", MappedClosure.class, closure)
     }
 
     @Whitelisted

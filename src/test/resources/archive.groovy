@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-plumber([
-    debug: true,
-    archiveDirs: ['outputDir/**'],
-    phases: [
-        [
-            name: "pants",
-            action: [
-                script: 'mkdir -p outputDir; echo "onePhase" > outputDir/outputFile'
-            ]
-        ]
-    ]
-])
+plumber {
+    debug true
+    archiveDirs 'outputDir/**'
+    phase {
+        name "pants"
+        action {
+            script 'mkdir -p outputDir; echo "onePhase" > outputDir/outputFile'
+        }
+    }
+}
 

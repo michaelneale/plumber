@@ -21,20 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-plumber([
-    debug: true,
-    phases: [
-        [
-            name: "pants",
-            action: [
-                script: "echo onePhase"
-            ]
-        ],
-        [
-            name: "trousers",
-            action: [
-                script: "echo twoPhase"
-            ]
-        ]
-    ]
-], true)
+plumber({ ->
+    debug true
+    phase {
+        name "pants"
+        action {
+            script "echo onePhase"
+        }
+    }
+    phase {
+        name "trousers"
+        action {
+            script "echo twoPhase"
+        }
+    }
+}, true)
+

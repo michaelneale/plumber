@@ -36,7 +36,7 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class SCM extends AbstractPlumberModel {
     @Whitelisted
-    String scmName
+    String name
 
     @Whitelisted
     MappedClosure config
@@ -48,22 +48,9 @@ public class SCM extends AbstractPlumberModel {
 
     }
 
-    public SCM(Map<String,Object> args) {
-        if (args != null) {
-            this.scmName = args.name
-            if (args.containsKey("dir") && args.dir != null) {
-                this.directory = args.dir
-            }
-            if (args.containsKey("config") && args.config instanceof Map) {
-                this.config = new MappedClosure((Map<String, Object>) args.config)
-            }
-
-        }
-    }
-
     @Whitelisted
     SCM name(String val) {
-        fieldVal("scmName", val)
+        fieldVal("name", val)
     }
 
     @Whitelisted
@@ -90,7 +77,7 @@ public class SCM extends AbstractPlumberModel {
             def argMap = [:]
             argMap.putAll(config.getMap())
 
-            argMap.put("name", scmName)
+            argMap.put("name", name)
             def indent = ""
             if (directory != null) {
                 lines << "dir('${directory}') {"

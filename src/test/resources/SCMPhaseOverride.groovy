@@ -21,32 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-plumber([
-    debug: true,
-    phases: [
-        [
-            name: 'first',
-            action: [
-                name: 'catFile',
-                file: 'README'
-            ]
-        ],
-        [
-            name: 'second',
-            action: [
-                name: 'catFile',
-                file: 'README'
-            ],
-            scm: [
-                [
-                    name: 'git',
-                    config: [
-                        url: $/REPO_URL_TOKEN/$,
-                        branch: '*/master'
-                    ]
-                ]
-            ],
-            after: 'first'
-        ]
-    ]
-])
+plumber {
+    debug true
+    phase {
+        name 'first'
+        action {
+            name 'catFile'
+            file 'README'
+        }
+    }
+    phase {
+        name 'second'
+        action {
+            name 'catFile'
+            file 'README'
+        }
+        scm {
+            name 'git'
+            config {
+                url "REPO_URL_TOKEN/"
+                branch '*/master'
+            }
+        }
+        after 'first'
+    }
+}
+

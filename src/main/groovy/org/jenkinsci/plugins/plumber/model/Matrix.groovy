@@ -39,14 +39,6 @@ public class Matrix extends AbstractPlumberModel {
 
     }
 
-    public Matrix(Map<String,Object> args) {
-        if (args != null) {
-            if (args.containsKey("axes") && args.axes instanceof Map) {
-                this.axes = new MappedClosure((Map<String, Object>) args.axes)
-            }
-        }
-    }
-
     // NOTE: Going with 'matrix { axes { FOO ["a", "b", "c"] } }' syntax so that we don't get screwed when we eventually
     // need to support other configuration options on Matrix.
     @Whitelisted

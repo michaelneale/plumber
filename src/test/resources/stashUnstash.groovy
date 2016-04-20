@@ -21,26 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-plumber([
-    debug: true,
-    phases: [
-        [
-            name: "pants",
-            stashDirs: ["outputDir/**"],
-            action: [
-                script: 'mkdir -p outputDir; export FOO="trousers"; echo "PANTS${FOO}" > outputDir/outputFile'
-            ]
-        ],
-        [
-            name: 'shirts',
-            unstash: 'pants',
-            clean: true,
-            action: [
-                script: 'cat outputDir/outputFile'
-            ],
-            after: 'pants'
-        ]
-    ]
-])
+plumber {
+    debug true
+    phase {
+        name "pants"
+        stashDirs "outputDir/**"
+        action {
+            script 'mkdir -p outputDir; export FOO="trousers"; echo "PANTS${FOO}" > outputDir/outputFile'
+        }
+    }
+    phase {
+        name 'shirts'
+        unstash {
+            fromPhase 'pants'
+        }
+        clean true
+        action {
+            script 'cat outputDir/outputFile'
+        }
+        after 'pants'
+    }
+}
 
 

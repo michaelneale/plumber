@@ -57,7 +57,8 @@ class PlumberConfigTest {
             stashDirs "stash/one", "stash/two"
 
             notifications {
-                config("email") {
+                config {
+                    name "email"
                     to "some@one.com"
                 }
                 onSuccess true
@@ -75,7 +76,8 @@ class PlumberConfigTest {
                 treatUnstableAsSuccess false
 
                 notifications {
-                    config("email") {
+                    config {
+                        name "email"
                         to "someone@else.com"
                     }
                     onSuccess false
@@ -101,7 +103,7 @@ class PlumberConfigTest {
         assertEquals("trousers", overrides.env?.pants)
         assertEquals("far", overrides.env?.boo)
         assertEquals(false, overrides.notifications?.onSuccess)
-        assertEquals("someone@else.com", overrides.notifications?.configs?.email?.to)
+        assertEquals("someone@else.com", overrides.notifications?.configs?.find { it.name == "email" }?.to)
         assertFalse(overrides.treatUnstableAsSuccess)
     }
 
@@ -130,65 +132,6 @@ class PlumberConfigTest {
         assertEquals("trousers", actionConfig.getMap().pants)
         assertEquals("polos", actionConfig.getMap().shirts)
         assertEquals("simpleEcho", actionConfig.getMap().name)
-    }
-
-    @Test
-    public void testMapConfig() {
-        def plumberConfig = new PlumberConfig()
-
-        def m = [
-                env:["foo": "bar", "boo": "far"],
-
-                archiveDirs: ["one/dir", "second/dir"],
-
-                stashDirs: ["stash/one", "stash/two"],
-
-                notifications: [
-                        configs:[
-                            [
-
-                                to: "some@one.com"
-                        ]],
-                        onSuccess: true
-                ],
-
-                treatUnstableAsSuccess: true,
-
-                phases: [
-                        [name: "overridePhase",
-                         env: ["foo": "banana", "pants": "trousers"],
-                         archiveDirs: "third/dir",
-                         treatUnstableAsSuccess: false,
-                         notifications: [
-                                 configs: [email: [
-                                         to: "someone@else.com"
-                                 ]],
-                                 onSuccess: false
-                         ],
-
-                         action: [
-                                 script: "echo hello"
-                         ]
-                        ]
-                ]
-        ]
-
-        plumberConfig.fromMap(m)
-
-        def root = plumberConfig.getConfig()
-
-        def phase = root.phases.first()
-
-        def overrides = phase.getOverrides(root)
-
-        assertEquals("third/dir", overrides.archiveDirs)
-        assertEquals("stash/one,stash/two", overrides.stashDirs)
-        assertEquals("banana", overrides.env?.foo)
-        assertEquals("trousers", overrides.env?.pants)
-        assertEquals("far", overrides.env?.boo)
-        assertEquals(false, overrides.notifications?.onSuccess)
-        assertEquals("someone@else.com", overrides.notifications?.configs?.email?.to)
-        assertFalse(overrides.treatUnstableAsSuccess)
     }
 
     @Test

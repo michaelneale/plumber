@@ -30,14 +30,12 @@ import io.jenkins.plugins.pipelineaction.PipelineAction
 import io.jenkins.plugins.pipelineaction.PipelineActionType
 import org.jenkinsci.plugins.plumber.model.Action
 import org.jenkinsci.plugins.plumber.model.MappedClosure
-import org.jenkinsci.plugins.plumber.model.MethodMissingWrapper
 import org.jenkinsci.plugins.plumber.model.Notifications
 import org.jenkinsci.plugins.plumber.model.Phase
 import org.jenkinsci.plugins.plumber.model.PlumberConfig
 import org.jenkinsci.plugins.plumber.model.Root
 import org.jenkinsci.plugins.plumber.model.SCM
 import org.jenkinsci.plugins.plumber.model.Unstash
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 import org.jenkinsci.plugins.workflow.cps.CpsScript
 
 class PlumberInterpreter implements Serializable {
@@ -145,15 +143,14 @@ class PlumberInterpreter implements Serializable {
                                 } else {
                                     def argMap = [:]
                                     argMap.putAll(s.config.getMap())
-
-                                    argMap.put("name", s.scmName)
+                                    argMap.put("name", s.name)
                                     if (s.directory != null) {
-                                        debugLog(root.debug, "Checking out with ${s.scmName} to directory ${s.directory}")
+                                        debugLog(root.debug, "Checking out with ${s.name} to directory ${s.directory}")
                                         script.dir(s.directory) {
                                             script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
                                         }
                                     } else {
-                                        debugLog(root.debug, "Checking out with ${s.scmName} to root directory")
+                                        debugLog(root.debug, "Checking out with ${s.name} to root directory")
                                         script.getProperty("runPipelineAction").call(PipelineActionType.SCM, argMap)
                                     }
                                 }

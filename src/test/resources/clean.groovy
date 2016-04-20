@@ -21,33 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-plumber([
-    debug: true,
-    phases: [
-        [
-            name: "first-phase",
-            action: [
-                script: "echo 'foo' > foo"
-            ]
-        ],
-        [
-            name: "second-phase",
-            action: [
-                // The generated file should still exist at this point.
-                script: "test -f foo"
-            ],
-            after: "first-phase"
-        ],
-        [
-            name: "third-phase",
-            clean: true,
-            action: [
-                // Now the generated file should not exist.
-                script: "test ! -f foo"
-            ],
-            after: "second-phase"
-        ]
-
-    ]
-])
+plumber {
+    debug true
+    phase {
+        name "first-phase"
+        action {
+            script "echo 'foo' > foo"
+        }
+    }
+    phase {
+        name "second-phase"
+        action {
+            // The generated file should still exist at this point.
+            script "test -f foo"
+        }
+        after "first-phase"
+    }
+    phase {
+        name "third-phase"
+        clean true
+        action {
+            // Now the generated file should not exist.
+            script "test ! -f foo"
+        }
+        after "second-phase"
+    }
+}
 
