@@ -24,7 +24,7 @@
 package org.jenkinsci.plugins.plumber;
 
 import hudson.Extension;
-import org.jenkinsci.plugins.plumber.model.MappedClosureWhiteList;
+import org.jenkinsci.plugins.plumber.model.MethodMissingWrapperWhiteList;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -54,7 +54,7 @@ public class PlumberStepDSL extends GlobalVariable {
     @Extension
     public static class PlumberWhiteList extends ProxyWhitelist {
         public PlumberWhiteList() throws IOException {
-            super(new MappedClosureWhiteList(), new StaticWhitelist(
+            super(new MethodMissingWrapperWhiteList(), new StaticWhitelist(
                     "method java.util.Map$Entry getKey",
                     "method java.util.Map$Entry getValue",
                     "staticField java.lang.System err",
@@ -65,12 +65,9 @@ public class PlumberStepDSL extends GlobalVariable {
                     "staticField hudson.model.Result FAILURE",
                     "method java.util.Map putAll java.util.Map",
                     "staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareGreaterThan java.lang.Object java.lang.Object",
-
-                    // Code calling this stuff may need to be moved into Utils.
-                    "method java.lang.Class getDeclaredFields",
                     "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods leftShift java.util.Collection java.lang.Object",
-                    "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.lang.Object[]",
-                    "field java.lang.reflect.Field name"));
+                    "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.lang.Object[]"
+            ));
         }
     }
 

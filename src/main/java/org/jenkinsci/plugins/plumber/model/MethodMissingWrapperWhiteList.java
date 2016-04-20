@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
  * has a "methodMissing" override to turn all method calls into map puts.
  */
 @Extension
-public class MappedClosureWhiteList extends Whitelist {
+public class MethodMissingWrapperWhiteList extends Whitelist {
     @Override
     public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
         if (method.getName().equals("invokeMethod") && MethodMissingWrapper.class.isAssignableFrom(receiver.getClass())) {
