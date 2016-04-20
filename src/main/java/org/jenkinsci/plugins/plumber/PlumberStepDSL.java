@@ -41,8 +41,9 @@ public class PlumberStepDSL extends GlobalVariable {
 
     @Override
     public Object getValue(CpsScript script) throws Exception {
-
+        // Make sure we've already loaded ClosureTranslatorMap or load it now.
         script.getClass().getClassLoader().loadClass("org.jenkinsci.plugins.plumber.ClosureTranslatorMap");
+
         return script.getClass()
                 .getClassLoader()
                 .loadClass("org.jenkinsci.plugins.plumber.PlumberInterpreter")
