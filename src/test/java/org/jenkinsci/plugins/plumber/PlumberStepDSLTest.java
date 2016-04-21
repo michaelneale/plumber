@@ -346,6 +346,26 @@ public class PlumberStepDSLTest {
                 WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
                 p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("NOT_FOUND",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+            }
+        });
+
+    }
+
+    @Test
+    public void testNotificationsOnSuccess() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                pipelineSourceFromResources("notificationsOnSuccess"));
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 story.j.assertLogContains("name:echoToFileNotifier",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("file:notifyOutput", b);

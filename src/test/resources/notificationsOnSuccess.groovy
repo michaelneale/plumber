@@ -29,6 +29,8 @@ plumber {
             name "echoToFileNotifier"
             file "notifyOutput"
         }
+        // Lying slightly - default is to only notify on failure
+        onSuccess true
     }
     phase {
         name 'pants'
@@ -39,7 +41,7 @@ plumber {
     phase {
         name 'trousers'
         action {
-            script '[ -e notifyOutput ] || echo NOT_FOUND'
+            script 'cat notifyOutput'
         }
         after 'pants'
     }
