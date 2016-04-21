@@ -225,6 +225,7 @@ class PlumberInterpreter implements Serializable {
 
         def shouldSend = false
         def actualAction = getActualAction(phase.action)
+        def currentResult = script.getProperty("currentBuild").getResult() ?: "SUCCESS"
 
         if (before) {
             // We'll send pre-phase emails whenever "beforePhase" is set or if this an input phase.
@@ -239,9 +240,7 @@ class PlumberInterpreter implements Serializable {
                 failureResult = Result.UNSTABLE
             }
 
-            def currentResult = script.getProperty("currentBuild").getResult()
-
-            if (currentResult == null || currentResult.isBetterThan(failureResult)) {
+            if (currentResult == null || Result.fromString(currentResult).isBetterThan(failureResult)) {
                 if (n.onSuccess) {
                     shouldSend = true
                 }
@@ -259,6 +258,10 @@ class PlumberInterpreter implements Serializable {
                 def notifiers = getNotifiers(phase.name, before, n.configs)
                 for (int i = 0; i < notifiers.size(); i++) {
                     def thisNotifier = notifiers.get(i)
+                    thisNotifier.buildInfo = script.getProperty("env").getProperty("JOB_NAME") + script.getProperty("currentBuild").getDisplayName()
+                    thisNotifier.phase = phase.name
+                    thisNotifier.result = currentResult
+                    thisNotifier.before = before
                     script.getProperty("runPipelineAction").call(PipelineActionType.NOTIFIER, thisNotifier)
                 }
             }
@@ -382,7 +385,8 @@ class PlumberInterpreter implements Serializable {
     @NonCPS
     private List<Map<String,Object>> getNotifiers(String phaseName, Boolean before, List<MappedClosure> configs) {
         def notifiers = []
-        configs.each { v ->
+        for (int i = 0; i < configs.size(); i++) {
+            def v = configs.get(i)
             def conf = v?.getMap()
             if (conf != null) {
                 conf.phaseName = phaseName

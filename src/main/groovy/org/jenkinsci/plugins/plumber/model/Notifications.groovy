@@ -102,6 +102,7 @@ public class Notifications extends AbstractPlumberModel {
 
         lines << "def generalNotifier(String phaseName, Map<String,Boolean> flags, Map<String,Map> notifiers) {"
         lines << "\tdef shouldSend = false"
+        lines << "\tdef currentResult = currentBuild.getResult() ?: 'SUCCESS'"
 
         lines << "\tif (flags.before) {"
         lines << "\t\tif (flags.beforePhase || flags.hasInput != null) {"
@@ -115,8 +116,7 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t\t\tfailureResult = Result.UNSTABLE"
         lines << "\t\t}"
 
-        lines << "\t\tdef currentResult = currentBuild.getResult()"
-        lines << "\t\tif (currentResult == null || currentResult.isBetterThan(failureResult)) {"
+        lines << "\t\tif (currentResult == null || Result.fromString(currentResult).isBetterThan(failureResult)) {"
         lines << "\t\t\tif (flags.onSuccess) {"
         lines << "\t\t\t\tshouldSend = true"
         lines << "\t\t\t}"
@@ -131,6 +131,9 @@ public class Notifications extends AbstractPlumberModel {
         lines << "\t\tdef theseNotifiers = getNotifiers(phase.name, before, n.configs)"
         lines << "\t\tfor (int i = 0; i < theseNotifiers.size(); i++) {"
         lines << "\t\t\tdef thisNotifier = theseNotifiers.get(i)"
+        lines << "\t\t\tthisNotifier.buildInfo = env.JOB_NAME + currentBuild.getDisplayName()"
+        lines << "\t\t\tthisNotifier.result = currentResult"
+        lines << "\t\t\tthisNotifier.before = before"
         lines << "\t\t\trunPipelineAction(PipelineActionType.NOTIFIER, thisNotifier)"
         lines << "\t\t}"
         lines << "\t}"

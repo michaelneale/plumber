@@ -161,6 +161,7 @@ public class Root extends AbstractPlumberModel {
 
         lines << "import io.jenkins.plugins.pipelineaction.PipelineActionType"
         lines << "import org.jenkinsci.plugins.plumber.model.*"
+        lines << "import hudson.model.Result"
         lines << ""
 
         if (!forExport) {
