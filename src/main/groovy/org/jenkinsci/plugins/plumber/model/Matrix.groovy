@@ -57,7 +57,7 @@ public class Matrix extends AbstractPlumberModel {
      * @return a list of maps, with env var name as key and value of the env var as value
      */
     @Whitelisted
-    public List<Map<String,Object>> matrixCombinations() {
+    public List<Map<String,String>> matrixCombinations() {
         def combos = []
 
         // Just a bit of protection in case of empty axes.

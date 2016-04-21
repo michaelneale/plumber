@@ -26,7 +26,6 @@ package org.jenkinsci.plugins.plumber.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import io.jenkins.plugins.pipelineaction.PipelineActionType
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 import static org.jenkinsci.plugins.plumber.Utils.getTabs
@@ -62,7 +61,7 @@ public class Reporter extends AbstractPlumberModel {
         fieldVal("config", m)
     }
 
-    public List<String> toPipelineScript(Phase parent, int tabsDepth) {
+    public List<String> toPipelineScript(int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 
         def lines = []

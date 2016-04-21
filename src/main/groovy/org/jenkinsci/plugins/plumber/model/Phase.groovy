@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.plugins.plumber.model
 
-import com.google.common.collect.ImmutableList
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
@@ -268,19 +267,36 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("clean", val)
     }
 
-    public void addToEnv(String key, Object value) {
+    /**
+     * Adds an individual key/value pair to the environment.
+     *
+     * @param key
+     * @param value
+     */
+    public void addToEnv(String key, String value) {
         this.env."${key}" = value
     }
 
-    public void addToEnv(Map<String, Object> inputMap) {
+    /**
+     * Adds the contents of a map to the environment
+     *
+     * @param inputMap
+     */
+    public void addToEnv(Map<String, String> inputMap) {
         this.env.putAll(inputMap)
     }
 
-    // Actually, I need to pass the root level in here too so that I know defaults for notifications etc.
+    /**
+     * Generates Pipeline source for this phase and given {@link Root}
+     *
+     * @param root
+     * @param tabsDepth
+     * @return Pipeline source code as a list of strings
+     */
     public List<String> toPipelineScript(Root root, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
         def overrides = getOverrides(root)
-        def overridesFlagsBase = overrides.findAll { it.value instanceof Boolean }
+        def overridesFlagsBase = overrides.flags()
         def notifierFlagsBase = overrides.notifications.flags()
         def overridesFlagsString = toArgForm(overridesFlagsBase)
 
@@ -291,8 +307,17 @@ public class Phase extends AbstractPlumberModel {
         return lines.collect { "${tabs}${it}" }
     }
 
+    /**
+     * Generates the Pipeline source for the actual phase execution.
+     *
+     * @param overridesFlagsString
+     * @param notifierFlagsBase
+     * @param overrides
+     * @param tabsDepth
+     * @return Pipeline source code as a list of strings
+     */
     private List<String> phaseExecutionCode(String overridesFlagsString, Map<String,Boolean> notifierFlagsBase,
-                                            Map<String,Object> overrides, int tabsDepth) {
+                                            PhaseOverrides overrides, int tabsDepth) {
         def lines = []
         def tabs = getTabs(tabsDepth)
 
@@ -306,12 +331,12 @@ public class Phase extends AbstractPlumberModel {
         lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: true] + notifierFlagsBase)}])"
         if (actionClass != null && actionClass.usesNode()) {
             if (!overrides.skipSCM) {
-                if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
+                if (!overrides.scms.isEmpty()) {
                     overrides.scms.each { SCM s ->
                         if (overrides.scms.size() > 1 && (s.directory == null || s.directory == "")) {
                             lines << "error('More than one SCM specified, and SCM specified without a directory, so failing.')"
                         } else {
-                            lines.addAll(s.toPipelineScript(this, 0))
+                            lines.addAll(s.toPipelineScript(0))
                         }
                     }
                 } else {
@@ -325,11 +350,11 @@ public class Phase extends AbstractPlumberModel {
         }
 
         lines << "catchError {"
-        lines.addAll(action.toPipelineScript(this, 1))
+        lines.addAll(action.toPipelineScript(1))
 
         if (actionClass != null && actionClass.usesNode()) {
             // Archiving and stashing.
-            if (!overrides.archiveDirs.isEmpty()) {
+            if (overrides.archiveDirs != null && overrides.archiveDirs != "") {
                 lines << "try {"
                 lines << "\tarchive ${toArgForm(overrides.archiveDirs)}"
                 lines << "} catch (Exception e) {"
@@ -337,7 +362,7 @@ public class Phase extends AbstractPlumberModel {
                 lines << "}"
             }
 
-            if (!overrides.stashDirs.isEmpty()) {
+            if (overrides.stashDirs != null && overrides.stashDirs != "") {
                 lines << "try {"
                 lines << "\tstash name: ${toArgForm(name)}, includes: ${toArgForm(overrides.stashDirs)}"
                 lines << "} catch (Exception e) {"
@@ -347,7 +372,7 @@ public class Phase extends AbstractPlumberModel {
             if (!reporters.isEmpty()) {
                 reporters.each { r ->
                     lines << "try {"
-                    lines.addAll(r.toPipelineScript(this, 1))
+                    lines.addAll(r.toPipelineScript(1))
                     lines << "} catch (Exception e) {"
                     lines << '\techo("Error running reporter ' + r.reporterName + ' with config ' +
                         r.config.getMap() + ', but continuing: ${e}"'
@@ -362,12 +387,21 @@ public class Phase extends AbstractPlumberModel {
         return lines.collect { "${tabs}${it}" }
     }
 
+    /**
+     * Generates Pipeline source for environment wrapping and passes onward to phase execution.
+     *
+     * @param overridesFlagsString
+     * @param notifierFlagsBase
+     * @param overrides
+     * @param tabsDepth
+     * @return Pipeline source code as a list of strings
+     */
     private List<String> envWrapper(String overridesFlagsString, Map<String,Boolean> notifierFlagsBase,
-                                    Map<String,Object> overrides, int tabsDepth) {
+                                    PhaseOverrides overrides, int tabsDepth) {
         def tabs = getTabs(tabsDepth)
         def lines = []
 
-        if (overrides.containsKey("envList") && overrides.envList != null && !overrides.envList.isEmpty()) {
+        if (overrides.envList != null && !overrides.envList.isEmpty()) {
             lines << "withEnv([${toArgForm(overrides.envList)}]) {"
             lines.addAll(phaseExecutionCode(overridesFlagsString, notifierFlagsBase, overrides, 1))
             lines << "}"
@@ -378,8 +412,17 @@ public class Phase extends AbstractPlumberModel {
         return lines.collect { "${tabs}${it}" }
     }
 
+    /**
+     * Generates Pipeline source for the node specification section and calls onwards to the environment wrapper.
+     *
+     * @param overridesFlagsString
+     * @param notifierFlagsBase
+     * @param overrides
+     * @param tabsDepth
+     * @return Pipeline source code as a list of Strings.
+     */
     private List<String> nodeLabelOrDocker(String overridesFlagsString, Map<String,Boolean> notifierFlagsBase,
-                                           Map<String,Object> overrides, int tabsDepth) {
+                                           PhaseOverrides overrides, int tabsDepth) {
         def lines = []
         def tabs = getTabs(tabsDepth)
 
@@ -421,63 +464,76 @@ public class Phase extends AbstractPlumberModel {
      * not specified here.
      *
      * @param root The Root this phase is in.
-     * @return A map of archiveDirs, stashDirs, env, scm and notifications
+     * @return An instance of PhaseOverrides for this root and phase objects.
      */
     @Whitelisted
-    public Map getOverrides(Root root) {
-        def overrideMap = [:]
+    public PhaseOverrides getOverrides(Root root) {
+        return new PhaseOverrides(root, this)
+    }
 
-        if (this.archiveDirs.isEmpty()) {
-            overrideMap.archiveDirs = root.archiveDirs?.join(',')
-        } else {
-            overrideMap.archiveDirs = this.archiveDirs?.join(',')
-        }
+    /**
+     * Wrapper class for overrides of {@link Root} configuration at the {@link Phase} level.
+     */
+    public static final class PhaseOverrides implements Serializable {
+        @Whitelisted
+        String archiveDirs
+        @Whitelisted
+        String stashDirs
+        @Whitelisted
+        Map<String,String> env = [:]
+        @Whitelisted
+        Notifications notifications
+        @Whitelisted
+        Boolean treatUnstableAsSuccess
+        @Whitelisted
+        Boolean skipSCM
+        @Whitelisted
+        List<SCM> scms = []
+        @Whitelisted
+        List<String> envList
 
-        if (this.stashDirs.isEmpty()) {
-            overrideMap.stashDirs = root.stashDirs?.join(',')
-        } else {
-            overrideMap.stashDirs = this.stashDirs?.join(',')
-        }
+        PhaseOverrides(Root root, Phase phase) {
+            this.archiveDirs = phase.archiveDirs?.isEmpty() ? root.archiveDirs?.join(',') : phase.archiveDirs?.join(',')
 
-        overrideMap.env = [:]
-        overrideMap.env.putAll(root.env)
+            this.stashDirs = phase.stashDirs?.isEmpty() ? root.stashDirs?.join(',') : phase.stashDirs?.join(',')
 
-        overrideMap.env.putAll(this.env)
+            this.env.putAll(root.env)
+            this.env.putAll(phase.env)
 
-        if (this.notifications == null) {
-            if (root.notifications != null) {
-                overrideMap.notifications = root.notifications
+            if (phase.notifications == null) {
+                if (root.notifications != null) {
+                    this.notifications = root.notifications
+                } else {
+                    this.notifications = new Notifications()
+                }
             } else {
-                overrideMap.notifications = new Notifications()
+                this.notifications = phase.notifications
             }
-        } else {
-            overrideMap.notifications = this.notifications
+
+            this.treatUnstableAsSuccess = phase.treatUnstableAsSuccess == null ? root.treatUnstableAsSuccess : phase.treatUnstableAsSuccess
+
+            this.skipSCM = phase.skipSCM == null ? root.skipSCM : phase.skipSCM
+
+            if (phase.scms.isEmpty()) {
+                this.scms.addAll(root.scms)
+            } else {
+                this.scms.addAll(phase.scms)
+            }
+
+            // Shortcut to avoid having to do collect in Pipeline script.
+            this.envList = this.env.collect { k, v -> "${k}=${v}" }
         }
 
-        if (this.treatUnstableAsSuccess == null) {
-            overrideMap.treatUnstableAsSuccess = root.treatUnstableAsSuccess
-        } else {
-            overrideMap.treatUnstableAsSuccess = this.treatUnstableAsSuccess
+        /**
+         * Gets any boolean fields from this class in a Map form - field name to boolean value.
+         *
+         * @return Map of string->booleans for flags.
+         */
+        public Map<String,Boolean> flags() {
+            return this.class.declaredFields.findAll { !it.synthetic && it.type == Boolean.class }.collectEntries { t ->
+                [(t.name): this."${t.name}"]
+            }
         }
-
-        if (this.skipSCM == null) {
-            overrideMap.skipSCM = root.skipSCM
-        } else {
-            overrideMap.skipSCM = this.skipSCM
-        }
-
-        if (this.scms.isEmpty()) {
-            overrideMap.scms = []
-            overrideMap.scms.addAll(root.scms)
-        } else {
-            overrideMap.scms = []
-            overrideMap.scms.addAll(this.scms)
-        }
-
-        // Shortcut to avoid having to do collect in Pipeline script.
-        overrideMap.envList = overrideMap.env.collect { k, v -> "${k}=${v}" }
-
-        overrideMap
 
     }
 

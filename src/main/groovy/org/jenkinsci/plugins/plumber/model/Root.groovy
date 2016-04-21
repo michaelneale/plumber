@@ -244,7 +244,7 @@ public class Root extends AbstractPlumberModel {
 
                     exSetDetails.phases << newPhase
                 } else {
-                    p.matrix.matrixCombinations().each { Map<String,Object> thisCombo ->
+                    p.matrix.matrixCombinations().each { Map<String,String> thisCombo ->
                         Phase newPhase = p.clone()
                         newPhase.addToEnv(thisCombo)
                         newPhase.name = p.name + "+" + thisCombo.collect { k, v ->

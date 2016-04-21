@@ -135,8 +135,6 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
         }
     }
 
-
-
     /**
      * Transforms this node of the plumber model and everything below it into a simple form for later processing. 
      *
@@ -178,7 +176,8 @@ public abstract class AbstractPlumberModel<T extends AbstractPlumberModel<T>> im
 
                         // If we've got a collection here, then we need to collect and transform its elements.
                         if (fieldValue instanceof Collection) {
-                            tree.closures."${fieldName}" = ((Collection) fieldValue).collect { AbstractPlumberModel a ->
+                            Collection collectionValue = fieldValue
+                            tree.closures."${fieldName}" = collectionValue.collect { AbstractPlumberModel a ->
                                 a.toTree()
                             }
                         }

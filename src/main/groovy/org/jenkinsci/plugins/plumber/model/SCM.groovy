@@ -68,7 +68,7 @@ public class SCM extends AbstractPlumberModel {
         fieldVal("config", m)
     }
 
-    public List<String> toPipelineScript(Phase parent, int tabsDepth) {
+    public List<String> toPipelineScript(int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 
         def lines = []

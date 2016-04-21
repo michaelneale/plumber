@@ -66,11 +66,6 @@ class PlumberInterpreter implements Serializable {
         executePipeline(root, doCodeGen)
     }
 
-    def call(Map config, Boolean doCodeGen = false) {
-        Root root = getRootConfig(config)
-        executePipeline(root, doCodeGen)
-    }
-
     private void executePipeline(Root root, Boolean doCodeGen) {
 
         if (doCodeGen) {
@@ -110,15 +105,8 @@ class PlumberInterpreter implements Serializable {
         return conf.getConfig()
     }
 
-    @NonCPS
-    def getRootConfig(Map m) {
-        def conf = new PlumberConfig()
-        conf.fromMap(m)
-        return conf.getConfig()
-    }
-
     def constructPhase(Root root, Phase phase) {
-        def overrides = phase.getOverrides(root)
+        Phase.PhaseOverrides overrides = phase.getOverrides(root)
 
         return {
             debugLog(root.debug, "Determining whether to run in node/label/docker")
@@ -134,7 +122,7 @@ class PlumberInterpreter implements Serializable {
                     debugLog(root.debug, "Checkout SCM")
 
                     if (!overrides.skipSCM) {
-                        if (overrides.containsKey("scms") && overrides.scms != null && !overrides.scms.isEmpty()) {
+                        if (overrides.scms != null && !overrides.scms.isEmpty()) {
                             debugLog(root.debug, "SCM overrides specified")
                             for (int i = 0; i < overrides.scms.size(); i++) {
                                 SCM s = overrides.scms.get(i)
@@ -232,7 +220,7 @@ class PlumberInterpreter implements Serializable {
     }
 
 
-    private Closure generalNotifier(Boolean before, Boolean debug, Map overrides, Phase phase) {
+    private Closure generalNotifier(Boolean before, Boolean debug, Phase.PhaseOverrides overrides, Phase phase) {
         Notifications n = overrides.notifications
 
         def shouldSend = false
@@ -286,8 +274,8 @@ class PlumberInterpreter implements Serializable {
      *
      * @return a Closure
      */
-    private Closure envWrapper(Map overrides, Boolean debug, Closure body) {
-        if (overrides.containsKey("envList") && overrides.envList != null && !overrides.envList.isEmpty()) {
+    private Closure envWrapper(Phase.PhaseOverrides overrides, Boolean debug, Closure body) {
+        if (overrides.envList != null && !overrides.envList.isEmpty()) {
             return {
                 debugLog(debug, "Overriding env with ${overrides.envList}")
                 script.withEnv(overrides.envList) {

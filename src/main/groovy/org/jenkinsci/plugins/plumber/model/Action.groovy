@@ -31,7 +31,7 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Action extends MappedClosure {
 
-    public List<String> toPipelineScript(Phase parent, int tabsDepth) {
+    public List<String> toPipelineScript(int tabsDepth) {
         def tabs = getTabs(tabsDepth)
 
         def lines = []

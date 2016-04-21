@@ -25,7 +25,7 @@ package org.jenkinsci.plugins.plumber.model
 
 /**
  * A dummy interface used on {@link MappedClosure} and the CPS-transformed
- * ClosureTranslatorMap to make sure we can use methodMissing on them.
+ * ClosureModelTranslator to make sure we can use methodMissing on them.
  */
 interface MethodMissingWrapper {
 

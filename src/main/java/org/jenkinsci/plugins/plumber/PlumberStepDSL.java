@@ -30,19 +30,22 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 @Extension
 public class PlumberStepDSL extends GlobalVariable {
     @Override
+    @Nonnull
     public String getName() {
         return "plumber";
     }
 
     @Override
-    public Object getValue(CpsScript script) throws Exception {
-        // Make sure we've already loaded ClosureTranslatorMap or load it now.
-        script.getClass().getClassLoader().loadClass("org.jenkinsci.plugins.plumber.ClosureTranslatorMap");
+    @Nonnull
+    public Object getValue(@Nonnull CpsScript script) throws Exception {
+        // Make sure we've already loaded ClosureModelTranslator or load it now.
+        script.getClass().getClassLoader().loadClass("org.jenkinsci.plugins.plumber.ClosureModelTranslator");
 
         return script.getClass()
                 .getClassLoader()
