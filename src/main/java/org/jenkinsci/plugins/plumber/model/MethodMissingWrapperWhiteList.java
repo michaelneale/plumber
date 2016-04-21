@@ -33,13 +33,8 @@ import java.lang.reflect.Method;
 public class MethodMissingWrapperWhiteList extends Whitelist {
     @Override
     public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
-        if (method.getName().equals("invokeMethod") && MethodMissingWrapper.class.isAssignableFrom(receiver.getClass())) {
-            return true;
-        } else if (method.getName().equals("getProperty") && MethodMissingWrapper.class.isAssignableFrom(receiver.getClass())) {
-            return true;
-        } else {
-            return false;
-        }
+        return method.getName().equals("invokeMethod")
+                && MethodMissingWrapper.class.isAssignableFrom(receiver.getClass());
     }
 
     @Override
