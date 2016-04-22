@@ -81,12 +81,11 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
                         resultValue = ctm.getModelForm()
                     } else {
                         // error!
-                        System.err.println("Got a closure translating to type ${actualType} which is not handled")
+                        throw new IllegalArgumentException("For field ${methodName}, got a closure translating to type ${actualType} which is not handled")
                     }
                 } else {
                     resultValue = argValue
                 }
-
 
                 if (Utils.isFieldA(List.class, actualClass, methodName)) {
                     if (!actualMap.containsKey(actualFieldName)) {
@@ -96,6 +95,8 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
                 } else {
                     actualMap[actualFieldName] = resultValue
                 }
+            } else {
+                throw new IllegalArgumentException("Got field ${methodName} which does not exist for ${actualClass}")
             }
         }
         this

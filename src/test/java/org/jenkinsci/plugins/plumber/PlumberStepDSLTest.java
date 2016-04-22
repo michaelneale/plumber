@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.plumber;
 
+import hudson.model.Result;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -64,8 +65,24 @@ public class PlumberStepDSLTest {
                 WorkflowRun b = p.scheduleBuild2(0).waitForStart();
                 story.j.assertLogContains("hello",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+            }
+        });
+    }
 
+    @Test
+    public void testInvalidCode() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                pipelineSourceFromResources("invalidCode"));
 
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertBuildStatus(Result.FAILURE, story.j.waitForCompletion(b));
             }
         });
     }
