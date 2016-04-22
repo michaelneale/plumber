@@ -195,4 +195,9 @@ public class Utils {
     public static void throwIllegalArgs(String s) throws IllegalArgumentException {
         throw new IllegalArgumentException(s)
     }
+
+    @Whitelisted
+    public static boolean isCollectionOrArray(obj) {
+        return obj instanceof Collection || obj.getClass().isArray()
+    }
 }

@@ -26,6 +26,7 @@ package org.jenkinsci.plugins.plumber.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.jenkinsci.plugins.plumber.Utils
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
 @ToString
@@ -65,7 +66,7 @@ public class Matrix extends AbstractPlumberModel {
             // A special case check - .combinations() will generate [["b"], ["a"], ["r"]] from ["bar"].
             // Messes up whenever all elements of the values() are strings.
             // Does fine with, e.g., [["bar", "baz"], "boo"], though.
-            if (axes.values().every { v -> !isCollectionOrArray(v) }) {
+            if (axes.values().every { v -> !Utils.isCollectionOrArray(v) }) {
                 combos.add(axes.getMap())
             } else {
                 // toList needed here and below to get combinations and transpose to play nice together.
@@ -81,11 +82,4 @@ public class Matrix extends AbstractPlumberModel {
         return combos
     }
 
-    private boolean isCollectionOrArray(obj) {
-        if (obj instanceof Collection || obj.getClass().isArray()) {
-            return true
-        } else {
-            return false
-        }
-    }
 }
