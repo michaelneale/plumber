@@ -62,16 +62,22 @@ public class Matrix extends AbstractPlumberModel {
 
         // Just a bit of protection in case of empty axes.
         if (!axes.isEmpty()) {
-            // toList needed here and below to get combinations and transpose to play nice together.
-            def keyList = axes.keySet().toList()
+            // A special case check - .combinations() will generate [["b"], ["a"], ["r"]] from ["bar"].
+            // Messes up whenever all elements of the values() are strings.
+            // Does fine with, e.g., [["bar", "baz"], "boo"], though.
+            if (axes.values().every { !List.class.isInstance(it) }) {
+                combos.add(axes.getMap())
+            } else {
+                // toList needed here and below to get combinations and transpose to play nice together.
+                def keyList = axes.keySet().toList()
 
-            List<List<String>> valueCombos = axes.values().toList().combinations()
+                List<List<String>> valueCombos = axes.values().toList().combinations()
 
-            valueCombos.each { List<String> combo ->
-                combos.add([keyList, combo].transpose().collectEntries())
+                valueCombos.each { List<String> combo ->
+                    combos.add([keyList, combo].transpose().collectEntries())
+                }
             }
         }
-
         return combos
     }
 }

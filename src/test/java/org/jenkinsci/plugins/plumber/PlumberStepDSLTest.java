@@ -52,17 +52,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testSingleSimpleStep() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("singleSimpleStep"));
+        prepRepoWithJenkinsfile("singleSimpleStep");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("hello",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
             }
@@ -71,17 +65,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testInvalidCode() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("invalidCode"));
+        prepRepoWithJenkinsfile("invalidCode");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertBuildStatus(Result.FAILURE, story.j.waitForCompletion(b));
             }
         });
@@ -89,17 +77,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testArbitraryCodeInAction() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("arbitraryCodeInAction"));
+        prepRepoWithJenkinsfile("arbitraryCodeInAction");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("echoing name == simpleEcho",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("echoing node == [echo:nested]", b);
@@ -109,17 +91,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testTwoLinearSteps() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("twoLinearSteps"));
+        prepRepoWithJenkinsfile("twoLinearSteps");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("hello",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogNotContains("Multiple phase", b);
@@ -132,17 +108,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testTwoParallelSteps() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("twoParallelSteps"));
+        prepRepoWithJenkinsfile("twoParallelSteps");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("onePhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("Multiple phase", b);
@@ -153,17 +123,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testCodeGen() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("codeGen"));
+        prepRepoWithJenkinsfile("codeGen");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("onePhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("Execute sub-workflows in parallel", b);
@@ -174,17 +138,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testArgsAsClosureFromNonCPS() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("argsAsClosureFromNonCPS"));
+        prepRepoWithJenkinsfile("argsAsClosureFromNonCPS");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("onePhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("Multiple phase", b);
@@ -209,9 +167,7 @@ public class PlumberStepDSLTest {
         sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("THIS IS A README",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
             }
@@ -239,9 +195,7 @@ public class PlumberStepDSLTest {
         sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("FIRST REPO",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("SECOND REPO", b);
@@ -251,17 +205,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testArchive() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("archive"));
+        prepRepoWithJenkinsfile("archive");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("outputDir",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 assertTrue(b.getArtifactManager().root().child("outputDir").isDirectory());
@@ -272,17 +220,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testStashUnstash() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("stashUnstash"));
+        prepRepoWithJenkinsfile("stashUnstash");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("outputDir",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("PANTStrousers", b);
@@ -292,17 +234,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testStashUnstashToDirectory() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("stashUnstashToDirectory"));
+        prepRepoWithJenkinsfile("stashUnstashToDirectory");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("outputDir",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("PANTStrousers", b);
@@ -312,17 +248,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testClean() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("clean"));
+        prepRepoWithJenkinsfile("clean");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b));
             }
         });
@@ -330,17 +260,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testArgsAsCpsClosure() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("argsAsCpsClosure"));
+        prepRepoWithJenkinsfile("argsAsCpsClosure");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("onePhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("Multiple phase", b);
@@ -352,17 +276,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testStashUnstashToDirectoryCPSClosure() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("stashUnstashToDirectoryCPSClosure"));
+        prepRepoWithJenkinsfile("stashUnstashToDirectoryCPSClosure");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("outputDir",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("PANTStrousers", b);
@@ -372,17 +290,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testNotificationsDefaults() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("notificationsDefaults"));
+        prepRepoWithJenkinsfile("notificationsDefaults");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("NOT_FOUND",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
             }
@@ -392,17 +304,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testNotificationsOnSuccess() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("notificationsOnSuccess"));
+        prepRepoWithJenkinsfile("notificationsOnSuccess");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("name:echoToFileNotifier",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("file:notifyOutput", b);
@@ -417,17 +323,11 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testNotificationsBeforePhase() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("notificationsBeforePhase"));
+        prepRepoWithJenkinsfile("notificationsBeforePhase");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("name:echoToFileNotifier",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("file:notifyOutput", b);
@@ -441,20 +341,45 @@ public class PlumberStepDSLTest {
 
     @Test
     public void testSimpleMatrix() throws Exception {
-        sampleRepo.init();
-        sampleRepo.write("Jenkinsfile",
-                pipelineSourceFromResources("simpleMatrix"));
+        prepRepoWithJenkinsfile("simpleMatrix");
 
-        sampleRepo.git("add", "Jenkinsfile");
-        sampleRepo.git("commit", "--message=files");
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
-                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
-                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
-                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("FOO is bar",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
                 story.j.assertLogContains("FOO is baz", b);
+                story.j.assertLogContains("Multiple phases in an execution set, run in parallel", b);
+                story.j.assertLogContains("[echo-phase+FOO=bar]", b);
+                story.j.assertLogContains("[echo-phase+FOO=baz]", b);
+            }
+        });
+    }
+
+    @Test
+    public void testSingleAxisSingleValueMatrix() throws Exception {
+        prepRepoWithJenkinsfile("singleAxisSingleValueMatrix");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("FOO is bar",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("Single phase in an execution set, run alone", b);
+            }
+        });
+    }
+
+    @Test
+    public void testDoubleAxisSingleValueMatrix() throws Exception {
+        prepRepoWithJenkinsfile("doubleAxisSingleValueMatrix");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("FOO is bar and PANTS is trousers",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("Single phase in an execution set, run alone", b);
             }
         });
     }
@@ -468,5 +393,20 @@ public class PlumberStepDSLTest {
         }
 
         return pipelineSource;
+    }
+
+    private void prepRepoWithJenkinsfile(String pipelineName) throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                pipelineSourceFromResources(pipelineName));
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+    }
+
+    private WorkflowRun getAndStartBuild() throws Exception {
+        WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+        p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+        return p.scheduleBuild2(0).waitForStart();
     }
 }
