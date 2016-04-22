@@ -348,7 +348,6 @@ class PlumberInterpreter implements Serializable {
 
     private def debugLog(Boolean debug, String msg) {
         if (debug) {
-            System.err.println "PLUMBER_DEBUG: ${msg}"
             return script.echo("PLUMBER_DEBUG: ${msg}")
         }
     }
