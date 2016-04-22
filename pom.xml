@@ -83,6 +83,21 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <property>
+              <name>hudson.udp</name>
+              <value>33849</value>
+            </property>
+          </systemProperties>
+          <reuseForks>true</reuseForks>
+          <forkCount>${concurrency}</forkCount>
+          <argLine>-Djava.awt.headless=true ${argLine}</argLine>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
   
