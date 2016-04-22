@@ -437,8 +437,28 @@ public class PlumberStepDSLTest {
                 story.j.assertLogContains("result:SUCCESS", b);
             }
         });
-
     }
+
+    @Test
+    public void testSimpleMatrix() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile",
+                pipelineSourceFromResources("simpleMatrix"));
+
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=files");
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowJob p = story.j.jenkins.createProject(WorkflowJob.class, "p");
+                p.setDefinition(new CpsScmFlowDefinition(new GitStep(sampleRepo.toString()).createSCM(), "Jenkinsfile"));
+                WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+                story.j.assertLogContains("FOO is bar",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("FOO is baz", b);
+            }
+        });
+    }
+
     private String pipelineSourceFromResources(String pipelineName) throws IOException {
         String pipelineSource = null;
 

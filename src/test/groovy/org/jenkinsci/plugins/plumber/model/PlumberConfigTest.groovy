@@ -142,7 +142,7 @@ class PlumberConfigTest {
                 name "foo"
                 matrix {
                     axes {
-                        "FOO" "bar", "baz"
+                        'FOO' "bar", "baz"
                     }
                 }
                 action {
