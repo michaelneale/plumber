@@ -190,4 +190,9 @@ public class Utils {
     public static ModelForm newInstanceWrapper(Class<ModelForm> c) {
         return c.newInstance()
     }
+
+    @Whitelisted
+    public static void throwIllegalArgs(String s) throws IllegalArgumentException {
+        throw new IllegalArgumentException(s)
+    }
 }

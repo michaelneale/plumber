@@ -58,9 +58,18 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
             argValue = args[0]
         }
 
-        // If we're already in a MappedClosure, we're fine.
+        // If we're already in a MappedClosure, we may need to recurse if the value itself is a closure.
         if (Utils.assignableFromWrapper(MappedClosure.class, actualClass) && argValue != null) {
-            actualMap[methodName] = argValue
+            if (Utils.instanceOfWrapper(Closure.class, argValue)) {
+                def ctm = new ClosureModelTranslator(MappedClosure.class)
+                Closure argClosure = argValue
+                argClosure.delegate = ctm
+                argClosure.resolveStrategy = Closure.DELEGATE_ONLY
+                argClosure.call()
+                actualMap[methodName] = ctm.getMap()
+            } else {
+                actualMap[methodName] = argValue
+            }
         } else {
             def resultValue
             def actualFieldName = Utils.actualFieldName(actualClass, methodName)
@@ -81,7 +90,7 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
                         resultValue = ctm.getModelForm()
                     } else {
                         // error!
-                        throw new IllegalArgumentException("For field ${methodName}, got a closure translating to type ${actualType} which is not handled")
+                        Utils.throwIllegalArgs("For field ${methodName}, got a closure translating to type ${actualType} which is not handled")
                     }
                 } else {
                     resultValue = argValue
@@ -96,7 +105,7 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
                     actualMap[actualFieldName] = resultValue
                 }
             } else {
-                throw new IllegalArgumentException("Got field ${methodName} which does not exist for ${actualClass}")
+                Utils.throwIllegalArgs("Got field ${methodName} which does not exist for ${actualClass}")
             }
         }
         this
