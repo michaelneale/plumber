@@ -66,4 +66,26 @@ public class MatrixTest extends AbstractPlumberTest {
         });
     }
 
+    @Test
+    public void testDoubleAxisDoubleValueMatrix() throws Exception {
+        prepRepoWithJenkinsfile("doubleAxisDoubleValueMatrix");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("FOO is bar and PANTS is trousers",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("Multiple phases in an execution set, run in parallel", b);
+                story.j.assertLogContains("[echo-phase+FOO=bar,PANTS=trousers]", b);
+                story.j.assertLogContains("[echo-phase+FOO=bar,PANTS=slacks]", b);
+                story.j.assertLogContains("[echo-phase+FOO=baz,PANTS=trousers]", b);
+                story.j.assertLogContains("[echo-phase+FOO=baz,PANTS=slacks]", b);
+                story.j.assertLogContains("FOO is bar and PANTS is slacks", b);
+                story.j.assertLogContains("FOO is baz and PANTS is trousers", b);
+                story.j.assertLogContains("FOO is baz and PANTS is slacks", b);
+
+            }
+        });
+    }
+
 }

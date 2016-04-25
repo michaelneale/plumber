@@ -21,11 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.plugins.plumber.model
+plumber {
+    debug true
+    phase {
+        name "echo-phase"
+        matrix {
+            axes {
+                "FOO" "bar", "baz"
+                "PANTS" "trousers", "slacks"
+            }
+        }
+        action {
+            script 'echo "FOO is ${FOO} and PANTS is ${PANTS}"'
+        }
+    }
 
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
-
-interface ModelForm {
-    @Whitelisted
-    public void modelFromMap(Map<String,Object> m)
 }
+
