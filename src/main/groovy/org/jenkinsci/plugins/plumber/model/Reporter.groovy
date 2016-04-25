@@ -37,7 +37,7 @@ import static org.jenkinsci.plugins.plumber.Utils.toArgForm
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class Reporter extends AbstractPlumberModel {
     @Whitelisted
-    String reporterName
+    String name
 
     @Whitelisted
     MappedClosure config
@@ -48,7 +48,7 @@ public class Reporter extends AbstractPlumberModel {
 
     @Whitelisted
     Reporter name(String val) {
-        fieldVal("reporterName", val)
+        fieldVal("name", val)
     }
 
     @Whitelisted
@@ -70,7 +70,7 @@ public class Reporter extends AbstractPlumberModel {
             def argMap = [:]
             argMap.putAll(config.getMap())
 
-            argMap.put("name", reporterName)
+            argMap.put("name", name)
             lines << "runPipelineAction(PipelineActionType.REPORTER, [${toArgForm(argMap)}])"
         }
 

@@ -201,12 +201,17 @@ class PlumberInterpreter implements Serializable {
 
                     if (!phase.reporters.isEmpty()) {
                         debugLog(root.debug, "Running configured reporters")
-                        phase.reporters.each { r ->
+                        for (int i = 0; i < phase.reporters.size(); i++) {
+                            def r = phase.reporters.get(i)
+                            def argMap = [:]
+                            argMap.putAll(r.config.getMap())
+                            argMap.put("name", r.name)
                             try {
-                                debugLog(root.debug, "Running reporter ${r.reporterName}")
-                                script.getProperty("runPipelineAction").call(PipelineActionType.REPORTER, r.config.getMap())
+
+                                debugLog(root.debug, "Running reporter ${argMap.name}")
+                                script.getProperty("runPipelineAction").call(PipelineActionType.REPORTER, argMap)
                             } catch (Exception e) {
-                                script.echo("Error running reporter ${r.reporterName} with config ${r.config.getMap()}, but continuing: ${e}")
+                                script.echo("Error running reporter ${argMap.name} with config ${argMap}, but continuing: ${e}")
                             }
                         }
                     }

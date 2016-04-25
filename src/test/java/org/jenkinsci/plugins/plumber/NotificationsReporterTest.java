@@ -20,7 +20,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 
-public class NotificationsTest extends AbstractPlumberTest {
+public class NotificationsReporterTest extends AbstractPlumberTest {
 
     @Test
     public void testNotificationsDefaults() throws Exception {
@@ -72,4 +72,20 @@ public class NotificationsTest extends AbstractPlumberTest {
             }
         });
     }
+
+    @Test
+    public void testReporterDefaults() throws Exception {
+        prepRepoWithJenkinsfile("reporterDefaults");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("name:echoToFileReporter",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("file:reporterOutput", b);
+            }
+        });
+
+    }
+
 }

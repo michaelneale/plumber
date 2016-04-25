@@ -374,7 +374,7 @@ public class Phase extends AbstractPlumberModel {
                     lines << "try {"
                     lines.addAll(r.toPipelineScript(1))
                     lines << "} catch (Exception e) {"
-                    lines << '\techo("Error running reporter ' + r.reporterName + ' with config ' +
+                    lines << '\techo("Error running reporter ' + r.name + ' with config ' +
                         r.config.getMap() + ', but continuing: ${e}"'
                     lines << '}'
                 }
