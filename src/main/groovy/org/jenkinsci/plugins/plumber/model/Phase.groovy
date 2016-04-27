@@ -508,6 +508,11 @@ public class Phase extends AbstractPlumberModel {
                 }
             } else {
                 this.notifications = phase.notifications
+
+                // Get rid of need to specify configs in overrides.
+                if (phase.notifications.configs.isEmpty()) {
+                    this.notifications.configs.addAll(root.notifications.configs)
+                }
             }
 
             this.treatUnstableAsSuccess = phase.treatUnstableAsSuccess == null ? root.treatUnstableAsSuccess : phase.treatUnstableAsSuccess

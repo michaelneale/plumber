@@ -37,8 +37,64 @@ public class NotificationsReporterTest extends AbstractPlumberTest {
     }
 
     @Test
+    public void testNotificationsSkipPhase() throws Exception {
+        prepRepoWithJenkinsfile("notificationsSkipPhase");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("name:echoToFileNotifier",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("file:notifyOutput", b);
+                story.j.assertLogContains("phaseName:pants", b);
+                story.j.assertLogContains("before:false", b);
+                story.j.assertLogContains("buildInfo:p#1", b);
+                story.j.assertLogContains("result:SUCCESS", b);
+            }
+        });
+
+    }
+
+    @Test
     public void testNotificationsOnSuccess() throws Exception {
         prepRepoWithJenkinsfile("notificationsOnSuccess");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("name:echoToFileNotifier",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("file:notifyOutput", b);
+                story.j.assertLogContains("phaseName:pants", b);
+                story.j.assertLogContains("before:false", b);
+                story.j.assertLogContains("buildInfo:p#1", b);
+                story.j.assertLogContains("result:SUCCESS", b);
+            }
+        });
+
+    }
+
+    @Test
+    public void testNotificationsOverride() throws Exception {
+        prepRepoWithJenkinsfile("notificationsOverride");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("name:echoToFileNotifier",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogContains("file:notifyOutput1", b);
+                story.j.assertLogContains("file:notifyOutput2", b);
+                story.j.assertLogContains("phaseName:pants", b);
+                story.j.assertLogContains("phaseName:trousers", b);
+            }
+        });
+
+    }
+
+    @Test
+    public void testNotificationsOverrideKeepsConfigs() throws Exception {
+        prepRepoWithJenkinsfile("notificationsOverrideKeepsConfigs");
 
         story.addStep(new Statement() {
             @Override public void evaluate() throws Throwable {
