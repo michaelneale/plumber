@@ -166,18 +166,25 @@ class PlumberInterpreter implements Serializable {
                         }
                     }
 
-                    debugLog(root.debug, "Executing action, wrapped in catchError")
-                    // Phase execution
-                    script.catchError {
-                        def actionMap = phase.action?.getMap()
-                        if (actionMap != null && !actionMap.isEmpty()) {
-                            // TODO: Write the actual step!
+                    if (phase.action != null && !phase.action.getMap().isEmpty()) {
+                        debugLog(root.debug, "Executing action, wrapped in catchError")
+                        // Phase execution
+                        script.catchError {
+                            def actionMap = phase.action?.getMap()
                             debugLog(root.debug, "Running action ${actionMap.name ?: 'script'}")
                             script.getProperty("runPipelineAction").call(PipelineActionType.STANDARD, actionMap)
-                        } else {
-                            debugLog(root.debug, "ERROR: No action specified")
-                            script.error("No action specified")
                         }
+                    } else if (phase.pipeline != null) {
+                        debugLog(root.debug, "Executing Pipeline closure, wrapped in catchError")
+                        script.catchError {
+                            Closure closure = phase.pipeline
+                            closure.delegate = script
+                            closure.resolveStrategy = Closure.DELEGATE_FIRST
+                            closure.call()
+                        }
+                    } else {
+                        debugLog(root.debug, "ERROR: No action or Pipeline code specified")
+                        script.error("No action or Pipeline code specified")
                     }
 
                     // Archiving and stashing.
@@ -311,7 +318,7 @@ class PlumberInterpreter implements Serializable {
     private Closure nodeLabelOrDocker(Phase phase, Boolean debug, Closure body) {
         def actualAction = getActualAction(phase.action)
 
-        if (actualAction != null && !actualAction.usesNode()) {
+        if (phase.pipeline == null && (actualAction != null && !actualAction.usesNode())) {
             // If we're prompting for input, don't wrap in a node.
             return {
                 debugLog(debug, "Running on flyweight executor for input")

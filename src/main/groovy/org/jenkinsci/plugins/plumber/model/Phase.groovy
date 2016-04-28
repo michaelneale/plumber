@@ -84,6 +84,9 @@ public class Phase extends AbstractPlumberModel {
     @Whitelisted
     Boolean skipSCM
 
+    @Whitelisted
+    Closure pipeline
+
     // TODO: Decide whether to default to clean workspaces. Currently *not*.
     @Whitelisted
     Boolean clean
@@ -267,6 +270,11 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("clean", val)
     }
 
+    @Whitelisted
+    Phase pipeline(Closure val) {
+        fieldVal("pipeline", val)
+    }
+
     /**
      * Adds an individual key/value pair to the environment.
      *
@@ -329,7 +337,7 @@ public class Phase extends AbstractPlumberModel {
         }
 
         lines << "generalNotifier(${toArgForm(name)}, [${overridesFlagsString}], [${toArgForm([before: true] + notifierFlagsBase)}])"
-        if (actionClass != null && actionClass.usesNode()) {
+        if (pipeline != null || (actionClass != null && actionClass.usesNode())) {
             if (!overrides.skipSCM) {
                 if (!overrides.scms.isEmpty()) {
                     overrides.scms.each { SCM s ->
@@ -350,9 +358,13 @@ public class Phase extends AbstractPlumberModel {
         }
 
         lines << "catchError {"
-        lines.addAll(action.toPipelineScript(1))
+        if (action != null && !action.isEmpty()) {
+            lines.addAll(action.toPipelineScript(1))
+        } else {
+            // TODO: Maybe figure out how to handle Pipeline closures here
+        }
 
-        if (actionClass != null && actionClass.usesNode()) {
+        if (pipeline != null || (actionClass != null && actionClass.usesNode())) {
             // Archiving and stashing.
             if (overrides.archiveDirs != null && overrides.archiveDirs != "") {
                 lines << "try {"

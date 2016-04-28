@@ -74,10 +74,12 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
             def resultValue
             def actualFieldName = Utils.actualFieldName(actualClass, methodName)
             if (actualFieldName != null) {
-                // If the argument is a Closure, then we need to recurse to get the value.
-                if (argValue != null && Utils.instanceOfWrapper(Closure.class, argValue)) {
+                def actualType = Utils.actualFieldType(actualClass, methodName)
+
+                // If the argument is a Closure, but the field is *not* a Closure, we need to recurse.
+                if (argValue != null && Utils.instanceOfWrapper(Closure.class, argValue)
+                    && !Utils.assignableFromWrapper(Closure.class, actualType)) {
                     Closure argClosure = argValue
-                    def actualType = Utils.actualFieldType(actualClass, methodName)
 
                     def ctm = new ClosureModelTranslator(actualType)
 

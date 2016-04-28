@@ -150,4 +150,31 @@ public class BasicPlumberTest extends AbstractPlumberTest {
         });
 
     }
+
+    @Test
+    public void testNoActionNoPipeline() throws Exception {
+        prepRepoWithJenkinsfile("noActionNoPipeline");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("No action or Pipeline code specified",
+                        story.j.assertBuildStatus(Result.FAILURE, story.j.waitForCompletion(b)));
+            }
+        });
+    }
+
+    @Test
+    public void testSimpleInlinePipeline() throws Exception {
+        prepRepoWithJenkinsfile("simpleInlinePipeline");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("FOO is bar",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+            }
+        });
+
+    }
 }

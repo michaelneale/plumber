@@ -129,6 +129,7 @@ class PlumberConfigTest {
         assertNotNull(actionConfig)
         assertNotNull(actionConfig.getMap())
 
+        assertNull(root.phases[0].pipeline)
         assertEquals("trousers", actionConfig.getMap().pants)
         assertEquals("polos", actionConfig.getMap().shirts)
         assertEquals("simpleEcho", actionConfig.getMap().name)
@@ -170,6 +171,29 @@ class PlumberConfigTest {
         assertTrue(phasesFromExSet.any { Phase p ->
             p.name == "foo+FOO=baz" && p.env != null && p.env.get("FOO") != null && p.env.get("FOO") == "baz"
         })
+    }
+
+    @Test
+    public void testInlinePipeline() {
+        def config = new PlumberConfig()
+        def c = {
+            phase {
+                name "foo"
+                pipeline {
+                    sh "Tada"
+                }
+            }
+        }
+
+        config.fromClosure(c)
+        def root = config.getConfig()
+
+        assertTrue(root.phases.size() == 1)
+        Phase p = root.phases[0]
+
+        assertNull(p.action)
+        assertNotNull(p.pipeline)
+        assertTrue(p.pipeline instanceof Closure)
     }
 
 }
