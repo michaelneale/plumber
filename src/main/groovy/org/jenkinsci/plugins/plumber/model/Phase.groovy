@@ -85,7 +85,7 @@ public class Phase extends AbstractPlumberModel {
     Boolean skipSCM
 
     @Whitelisted
-    Closure pipeline
+    PipelineClosureWrapper pipeline
 
     // TODO: Decide whether to default to clean workspaces. Currently *not*.
     @Whitelisted
@@ -271,7 +271,7 @@ public class Phase extends AbstractPlumberModel {
     }
 
     @Whitelisted
-    Phase pipeline(Closure val) {
+    Phase pipeline(PipelineClosureWrapper val) {
         fieldVal("pipeline", val)
     }
 

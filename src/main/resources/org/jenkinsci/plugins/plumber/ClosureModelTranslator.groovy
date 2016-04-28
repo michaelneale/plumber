@@ -27,6 +27,8 @@ import org.jenkinsci.plugins.plumber.model.AbstractPlumberModel
 import org.jenkinsci.plugins.plumber.model.MappedClosure
 import org.jenkinsci.plugins.plumber.model.MethodMissingWrapper
 import org.jenkinsci.plugins.plumber.model.ModelForm
+import org.jenkinsci.plugins.plumber.model.PipelineClosureWrapper
+import org.jenkinsci.plugins.plumber.model.PipelineScriptValidator
 
 public class ClosureModelTranslator implements MethodMissingWrapper, Serializable {
     Map<String,Object> actualMap = [:]
@@ -76,23 +78,37 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
             if (actualFieldName != null) {
                 def actualType = Utils.actualFieldType(actualClass, methodName)
 
-                // If the argument is a Closure, but the field is *not* a Closure, we need to recurse.
-                if (argValue != null && Utils.instanceOfWrapper(Closure.class, argValue)
-                    && !Utils.assignableFromWrapper(Closure.class, actualType)) {
+                // If the argument is a Closure, but the field is *not* a PipelineClosureWrapper, we need to recurse.
+                // If the field is a PipelineClosureWrapper, we need to validate it and store it.
+                if (argValue != null && Utils.instanceOfWrapper(Closure.class, argValue)) {
                     Closure argClosure = argValue
 
-                    def ctm = new ClosureModelTranslator(actualType)
+                    if (Utils.assignableFromWrapper(PipelineClosureWrapper.class, actualType)) {
+                        def validator = new PipelineScriptValidator()
+                        argClosure.delegate = validator
+                        argClosure.resolveStrategy = Closure.DELEGATE_ONLY
+                        argClosure.call()
 
-                    argClosure.delegate = ctm
-                    argClosure.resolveStrategy = Closure.DELEGATE_ONLY
-                    argClosure.call()
+                        if (!validator.invalidStepsUsed.isEmpty()) {
+                            Utils.throwIllegalArgs("Illegal Pipeline steps used in inline Pipeline - ${validator.invalidStepsUsed.join(', ')}")
+                        } else {
+                            resultValue = new PipelineClosureWrapper(argValue)
+                        }
 
-                    if (Utils.assignableFromWrapper(AbstractPlumberModel.class, actualType)
-                        || Utils.assignableFromWrapper(MappedClosure.class, actualType)) {
-                        resultValue = ctm.getModelForm()
                     } else {
-                        // error!
-                        Utils.throwIllegalArgs("For field ${methodName}, got a closure translating to type ${actualType} which is not handled")
+                        def ctm = new ClosureModelTranslator(actualType)
+
+                        argClosure.delegate = ctm
+                        argClosure.resolveStrategy = Closure.DELEGATE_ONLY
+                        argClosure.call()
+
+                        if (Utils.assignableFromWrapper(AbstractPlumberModel.class, actualType)
+                            || Utils.assignableFromWrapper(MappedClosure.class, actualType)) {
+                            resultValue = ctm.getModelForm()
+                        } else {
+                            // error!
+                            Utils.throwIllegalArgs("For field ${methodName}, got a closure translating to type ${actualType} which is not handled")
+                        }
                     }
                 } else {
                     resultValue = argValue

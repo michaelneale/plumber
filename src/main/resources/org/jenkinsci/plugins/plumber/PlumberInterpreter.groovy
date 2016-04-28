@@ -177,7 +177,7 @@ class PlumberInterpreter implements Serializable {
                     } else if (phase.pipeline != null) {
                         debugLog(root.debug, "Executing Pipeline closure, wrapped in catchError")
                         script.catchError {
-                            Closure closure = phase.pipeline
+                            Closure closure = phase.pipeline.closure
                             closure.delegate = script
                             closure.resolveStrategy = Closure.DELEGATE_FIRST
                             closure.call()

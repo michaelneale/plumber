@@ -175,6 +175,19 @@ public class BasicPlumberTest extends AbstractPlumberTest {
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
             }
         });
-
     }
+
+    @Test
+    public void testInlinePipelineInvalidSteps() throws Exception {
+        prepRepoWithJenkinsfile("inlinePipelineInvalidSteps");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("Illegal Pipeline steps used in inline Pipeline - stage, parallel, node",
+                        story.j.assertBuildStatus(Result.FAILURE, story.j.waitForCompletion(b)));
+            }
+        });
+    }
+
 }
