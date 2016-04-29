@@ -80,6 +80,17 @@ plumber {
 ```
 plumber {
 
+    env "foo": "banana", "pants": "trousers"
+    archiveDirs "third/dir"
+    treatUnstableAsSuccess false
+    notifications {
+        config {
+            name "email"
+            to "someone@else.com"
+        }
+        onSuccess false
+    }
+
     phase {
         name 'Build'
         action {
