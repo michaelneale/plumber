@@ -26,7 +26,10 @@ package org.jenkinsci.plugins.plumber.model
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
-
+/**
+ * A special-case closure handler used exclusively to determine whether invalid steps are called within
+ * the closure.
+ */
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
 public class PipelineScriptValidator implements Serializable, MethodMissingWrapper {
     @Whitelisted

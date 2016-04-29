@@ -28,6 +28,12 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted
 
+/**
+ * A wrapper for the Pipeline closures used in {@link Phase}s.
+ *
+ * The reason for a wrapper is to be able to detect when we have a field of a type that needs to be validated as not
+ * containing invalid steps.
+ */
 @ToString
 @EqualsAndHashCode
 @SuppressFBWarnings(value="SE_NO_SERIALVERSIONID")
