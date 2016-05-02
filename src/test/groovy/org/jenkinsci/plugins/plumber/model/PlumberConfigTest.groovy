@@ -193,7 +193,7 @@ class PlumberConfigTest {
 
         assertNull(p.action)
         assertNotNull(p.pipeline)
-        assertTrue(p.pipeline instanceof Closure)
+        assertTrue(p.pipeline.closure instanceof Closure)
     }
 
 }

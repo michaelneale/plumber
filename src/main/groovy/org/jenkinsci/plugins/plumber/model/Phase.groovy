@@ -275,6 +275,11 @@ public class Phase extends AbstractPlumberModel {
         fieldVal("pipeline", val)
     }
 
+    @Whitelisted
+    Phase pipeline(Closure val) {
+        fieldVal("pipeline", new PipelineClosureWrapper(val))
+    }
+
     /**
      * Adds an individual key/value pair to the environment.
      *

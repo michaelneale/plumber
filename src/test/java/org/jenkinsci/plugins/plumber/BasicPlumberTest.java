@@ -102,7 +102,7 @@ public class BasicPlumberTest extends AbstractPlumberTest {
                 WorkflowRun b = getAndStartBuild();
                 story.j.assertLogContains("onePhase",
                         story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
-                story.j.assertLogContains("Execute sub-workflows in parallel", b);
+                story.j.assertLogContains("Execute in parallel", b);
                 story.j.assertLogContains("twoPhase", b);
             }
         });
