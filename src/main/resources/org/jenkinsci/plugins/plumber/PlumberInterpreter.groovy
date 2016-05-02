@@ -113,7 +113,7 @@ class PlumberInterpreter implements Serializable {
             nodeLabelOrDocker(phase, root.debug) {
 
                 debugLog(root.debug, "Determining environment overrides")
-                envWrapper(overrides, root.debug) {
+                envWrapper(phase, overrides, root.debug) {
 
                     // Pre-phase notifier.
                     debugLog(root.debug, "Pre-phase notifier")
@@ -289,17 +289,18 @@ class PlumberInterpreter implements Serializable {
      *
      * @return a Closure
      */
-    private Closure envWrapper(Phase.PhaseOverrides overrides, Boolean debug, Closure body) {
+    private Closure envWrapper(Phase phase, Phase.PhaseOverrides overrides, Boolean debug, Closure body) {
+        def envList = [
+            "PLUMBER_PHASE=${phase.name}".toString()
+        ]
+
+
         if (overrides.envList != null && !overrides.envList.isEmpty()) {
-            return {
-                debugLog(debug, "Overriding env with ${overrides.envList}")
-                script.withEnv(overrides.envList) {
-                    body.call()
-                }
-            }
-        } else {
-            return {
-                debugLog(debug, "No env overrides, proceeding.")
+            envList.addAll(overrides.envList)
+        }
+        return {
+            debugLog(debug, "Overriding env with ${envList}")
+            script.withEnv(envList) {
                 body.call()
             }
         }

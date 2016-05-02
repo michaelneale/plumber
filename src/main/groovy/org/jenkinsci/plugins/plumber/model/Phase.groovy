@@ -418,13 +418,15 @@ public class Phase extends AbstractPlumberModel {
         def tabs = getTabs(tabsDepth)
         def lines = []
 
+        def envList = [ "PLUMBER_PHASE=${this.name}".toString() ]
+
         if (overrides.envList != null && !overrides.envList.isEmpty()) {
-            lines << "withEnv([${toArgForm(overrides.envList)}]) {"
-            lines.addAll(phaseExecutionCode(overridesFlagsString, notifierFlagsBase, overrides, 1))
-            lines << "}"
-        } else {
-            lines.addAll(phaseExecutionCode(overridesFlagsString, notifierFlagsBase, overrides, 0))
+            envList.addAll(overrides.envList)
         }
+
+        lines << "withEnv([${toArgForm(envList)}]) {"
+        lines.addAll(phaseExecutionCode(overridesFlagsString, notifierFlagsBase, overrides, 1))
+        lines << "}"
 
         return lines.collect { "${tabs}${it}" }
     }
