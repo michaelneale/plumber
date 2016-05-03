@@ -72,7 +72,8 @@ public class PlumberStepDSL extends GlobalVariable {
                     "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods leftShift java.util.Collection java.lang.Object",
                     "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods size java.lang.Object[]",
                     "staticMethod hudson.model.Result fromString java.lang.String",
-                    "method hudson.model.Result isBetterThan hudson.model.Result"
+                    "method hudson.model.Result isBetterThan hudson.model.Result",
+                    "method java.util.Collection addAll java.util.Collection"
             ));
         }
     }
