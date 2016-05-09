@@ -134,6 +134,69 @@ class PlumberDependencyGraphTest {
     }
 
     @Test
+    public void testFromPhaseListLimitParallelism() {
+        def plumberConfig = new PlumberConfig()
+        plumberConfig.fromClosure {
+            phase {
+                name "first"
+                action {
+                    script "echo first"
+                }
+            }
+            phase {
+                name "second"
+                action {
+                    script "echo second"
+                }
+            }
+            phase {
+                name "third"
+                action {
+                    script "echo third"
+                }
+                after "first"
+            }
+            phase {
+                name "fourth"
+                action {
+                    script "echo fourth"
+                }
+                after "first"
+            }
+        }
+
+        def root = plumberConfig.getConfig()
+
+        def graph = PlumberDependencyGraph.fromPhaseList(root.phases)
+
+        assertTrue(graph.hasMorePhases())
+
+        def firstPhaseList = graph.getNextPhases(1)
+        assertEquals(1, firstPhaseList.size())
+        def firstPhase = firstPhaseList[0]
+        assertTrue(firstPhase.equals("first") || firstPhase.equals("second"))
+        graph.postPhaseProcessing(firstPhaseList)
+
+        def secondPhaseList = graph.getNextPhases(1)
+        assertEquals(1, secondPhaseList.size())
+        def secondPhase = secondPhaseList[0]
+        assertTrue(secondPhase.equals("first") || secondPhase.equals("second"))
+        graph.postPhaseProcessing(secondPhaseList)
+
+        def thirdPhaseList = graph.getNextPhases(1)
+        assertEquals(1, thirdPhaseList.size())
+        def thirdPhase = thirdPhaseList[0]
+        assertTrue(thirdPhase.equals("third") || thirdPhase.equals("fourth"))
+        graph.postPhaseProcessing(thirdPhaseList)
+
+        def fourthPhaseList = graph.getNextPhases(1)
+        assertEquals(1, fourthPhaseList.size())
+        def fourthPhase = fourthPhaseList[0]
+        assertTrue(fourthPhase.equals("third") || fourthPhase.equals("fourth"))
+        graph.postPhaseProcessing(fourthPhaseList)
+    }
+
+    @Test
     public void testFromPhaseListBranchingAndJoining() {
         def plumberConfig = new PlumberConfig()
         plumberConfig.fromClosure {
@@ -188,4 +251,5 @@ class PlumberDependencyGraphTest {
         assertEquals("third", exSets[2].stageName)
         assertEquals("fourth", exSets[3].stageName)
     }
+
 }

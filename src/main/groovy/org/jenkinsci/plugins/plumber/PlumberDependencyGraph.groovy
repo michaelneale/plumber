@@ -105,13 +105,27 @@ public class PlumberDependencyGraph {
     /**
      * Get the next set of phases to run. Can be empty if there are no phases left.
      *
+     * @param parallelism Integer for parallelism to allow - i.e., how many phases to return at once. Defaults to 0,
+     *     meaning no restrictions.
      * @return The list of phases to run next
      */
-    public List<String> getNextPhases() {
+    public List<String> getNextPhases(int parallelism = 0) {
         // Return the phases to run - can be empty.
         def iter = new TopologicalOrderIterator<String, DefaultEdge>(phaseGraph)
-        iter.findAll {
+        def candidatePhases = iter.findAll {
             phaseGraph.incomingEdgesOf(it)?.isEmpty()
+        }
+
+        // Just return the phases if parallelism is 0 or the number of candidate phases is less than or equal to the
+        // parallelism count *or* if candidate phases is null or empty.
+        if (parallelism == 0
+            || candidatePhases == null
+            || candidatePhases.isEmpty()
+            || candidatePhases.size() <= parallelism) {
+            return candidatePhases
+        } else {
+            // Otherwise, return the first N phases where N is the parallelism count.
+            return candidatePhases[0..<parallelism]
         }
     }
 
