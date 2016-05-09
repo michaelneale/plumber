@@ -94,6 +94,21 @@ public class BasicPlumberTest extends AbstractPlumberTest {
     }
 
     @Test
+    public void testLimitedParallelism() throws Exception {
+        prepRepoWithJenkinsfile("limitedParallelism");
+
+        story.addStep(new Statement() {
+            @Override public void evaluate() throws Throwable {
+                WorkflowRun b = getAndStartBuild();
+                story.j.assertLogContains("onePhase",
+                        story.j.assertBuildStatusSuccess(story.j.waitForCompletion(b)));
+                story.j.assertLogNotContains("Multiple phase", b);
+                story.j.assertLogContains("twoPhase", b);
+            }
+        });
+    }
+
+    @Test
     public void testCodeGen() throws Exception {
         prepRepoWithJenkinsfile("codeGen");
 

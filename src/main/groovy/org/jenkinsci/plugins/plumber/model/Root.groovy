@@ -61,6 +61,9 @@ public class Root extends AbstractPlumberModel {
     @Whitelisted
     Boolean skipSCM = false
 
+    @Whitelisted
+    Integer parallelism = 0
+
     public Root() {
 
     }
@@ -156,6 +159,11 @@ public class Root extends AbstractPlumberModel {
     }
 
     @Whitelisted
+    Root parallelism(Integer val) {
+        fieldVal("parallelism", val)
+    }
+
+    @Whitelisted
     public List<String> toPipelineScript(Boolean forExport = false) {
         def lines = []
 
@@ -228,7 +236,7 @@ public class Root extends AbstractPlumberModel {
 
         while (graph.hasMorePhases()) {
             def exSetDetails = [:]
-            def exSetPhaseNames = graph.getNextPhases()
+            def exSetPhaseNames = graph.getNextPhases(parallelism)
             exSetDetails.stageName = exSetPhaseNames.join("+")
 
             exSetDetails.phases = []
