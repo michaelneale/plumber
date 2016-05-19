@@ -118,7 +118,7 @@ public class ClosureModelTranslator implements MethodMissingWrapper, Serializabl
                     if (!actualMap.containsKey(actualFieldName)) {
                         actualMap[actualFieldName] = []
                     }
-                    actualMap[actualFieldName] << resultValue
+                    actualMap[actualFieldName].add(resultValue)
                 } else {
                     actualMap[actualFieldName] = resultValue
                 }
