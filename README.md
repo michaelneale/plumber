@@ -16,6 +16,10 @@ Plumber aims to be a complimentary DSL you can use in your pipeline scripts that
 * Global configuration, over-ride per phase as needed
 * Sensible default behavior 
 
+## Design
+
+See [the design doc here](DESIGN.md)
+
 ## Status 
 
 Experimental and very much a work in progress. Keep an eye on this space. 
