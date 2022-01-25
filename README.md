@@ -1,5 +1,7 @@
 # Plumber
 
+[![Git](https://app.soluble.cloud/api/v1/public/badges/f43e477b-6411-4e8f-9077-064caa6e48a4.svg?orgId=451115019187)](https://app.soluble.cloud/repos/details/github.com/michaelneale/plumber?orgId=451115019187)  
+
 "Tell the plumber what your pipeline should look like but not how to build it."
 
 Plumber aims to be a complimentary DSL you can use in your pipeline scripts that is declarative in nature. 
